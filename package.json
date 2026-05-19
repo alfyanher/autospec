@@ -10,17 +10,8 @@
   },
   "scripts": {
     "start": "node bin/autospec.js",
-    "test": "node --test src/**/*.test.js",
-    "prepublishOnly": "node --check src/cli.js src/scanner.js src/generator.js src/config.js src/hooks.js bin/autospec.js"
+    "test": "node --test src/**/*.test.js"
   },
-  "files": [
-    "bin/",
-    "src/",
-    "prompts/",
-    "LICENSE",
-    "README.md",
-    ".autospec.yaml.template"
-  ],
   "keywords": [
     "documentation",
     "claude",
@@ -38,9 +29,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alfyanher/autospec.git"
-  },
-  "bugs": {
-    "url": "https://github.com/alfyanher/autospec/issues"
   },
   "homepage": "https://github.com/alfyanher/autospec#readme",
   "dependencies": {

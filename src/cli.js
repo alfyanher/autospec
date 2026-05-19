@@ -4,7 +4,7 @@ import ora from 'ora';
 import { loadConfig, initConfig } from './config.js';
 import { scanProject } from './scanner.js';
 import { generateDocs, checkClaudeCLI } from './generator.js';
-import { setupHooks } from './hooks.js';
+import { setupHooks, removeHooks } from './hooks.js';
 
 const COMMANDS = {
   init: commandInit,
@@ -33,7 +33,6 @@ async function commandInit(flags) {
     console.log(chalk.bold('\n🔍 AutoSpec — Living Documentation Generator\n'));
   }
 
-  // Fail fast: check Claude CLI before doing any work
   const spinner = ora('Checking Claude CLI...').start();
   const claudeCheck = await checkClaudeCLI();
   if (!claudeCheck.ok) {
@@ -53,7 +52,7 @@ async function commandInit(flags) {
   if (context.tokenEstimate > 80_000) {
     console.log(chalk.yellow(
       `  ⚠  Large context (~${Math.round(context.tokenEstimate / 1000)}k tokens). ` +
-      `Generation may be slow or truncated. Consider adding paths to .autospec.yaml ignore list.`
+      `Generation may be slow. Consider adding paths to .autospec.yaml ignore list.`
     ));
   }
 
@@ -62,7 +61,7 @@ async function commandInit(flags) {
   spinner.succeed(`Generated ${results.generated.length} documents in .autospec/`);
 
   if (results.failures.length > 0) {
-    console.log(chalk.yellow(`\n  ⚠  ${results.failures.length} document(s) failed to generate:`));
+    console.log(chalk.yellow(`\n  ⚠  ${results.failures.length} document(s) failed:`));
     results.failures.forEach(({ doc, error }) => {
       console.log(chalk.dim(`     ${doc}: ${error}`));
     });
@@ -118,12 +117,14 @@ async function commandGenerate(flags) {
     context.changedOnly = true;
     context.changedFiles = await getChangedFiles(projectRoot);
     if (context.changedFiles.length === 0) {
-      spinner.info('No changed files detected. Nothing to regenerate.');
+      spinner.info('No changed files detected since last commit. Nothing to regenerate.');
       return;
     }
+    spinner.text = `Generating docs for ${context.changedFiles.length} changed file(s)...`;
+  } else {
+    spinner.text = 'Generating documentation...';
   }
 
-  spinner.text = 'Generating documentation...';
   const results = await generateDocs(projectRoot, context, config);
 
   if (results.failures.length > 0) {
@@ -140,27 +141,9 @@ async function commandGenerate(flags) {
   }
 }
 
-async function commandDiff(flags) {
-  const projectRoot = resolve(flags.path || '.');
-
-  if (!flags.quiet) {
-    console.log(chalk.bold('\n📊 AutoSpec — Documentation Drift Report\n'));
-  }
-
-  const config = await loadConfig(projectRoot);
-  if (!config) {
-    console.log(chalk.red('No .autospec.yaml found. Run `autospec init` first.'));
-    process.exit(1);
-  }
-
-  const spinner = ora('Analyzing drift...').start();
-  await scanProject(projectRoot, config);
-  spinner.succeed('Analysis complete');
-
-  if (!flags.quiet) {
-    console.log(chalk.yellow('\nSections potentially outdated:'));
-    console.log(chalk.dim('  (Full drift detection runs during generate)\n'));
-  }
+async function commandDiff(_flags) {
+  console.log(chalk.yellow('\n⚠  `autospec diff` is not yet implemented.\n'));
+  console.log(chalk.dim('Run `autospec generate` to regenerate and compare output.\n'));
 }
 
 async function commandHook(flags) {
@@ -175,7 +158,6 @@ async function commandHook(flags) {
       console.log(chalk.green('✅ Git hooks installed'));
     }
   } else if (action === 'remove') {
-    const { removeHooks } = await import('./hooks.js');
     await removeHooks(projectRoot);
     console.log(chalk.green('✅ Git hooks removed'));
   } else {
@@ -191,21 +173,21 @@ ${chalk.bold('USAGE')}
   autospec <command> [options]
 
 ${chalk.bold('COMMANDS')}
-  init              Initialize AutoSpec in current project
-  generate          Regenerate all documentation
-  generate --changed  Only update docs for changed files
-  diff              Show documentation drift report
-  hook install      Install git commit hooks
-  hook remove       Remove git commit hooks
-  help              Show this help message
+  init                    Initialize AutoSpec in current project
+  generate                Regenerate all documentation
+  generate --changed      Only update docs for files changed since last commit
+  hook install            Install git commit hooks
+  hook remove             Remove git commit hooks
+  help                    Show this help message
 
 ${chalk.bold('OPTIONS')}
-  --path <dir>      Project root directory (default: .)
-  --no-hooks        Skip git hook installation during init
-  --quiet           Suppress non-error output (for CI/hooks)
-  --docs <list>     Comma-separated docs to generate
-                    (architecture,onboarding,decisions,components,api,dependencies,claude)
-  --tone <style>    Writing style: concise | detailed | enterprise
+  --path <dir>            Project root directory (default: current directory)
+  --no-hooks              Skip git hook installation during init
+  --quiet                 Suppress non-error output (useful in CI/hooks)
+  --docs <list>           Comma-separated doc IDs to generate:
+                          architecture, onboarding, decisions, components,
+                          api, dependencies, claude
+  --tone <style>          Writing style: concise | detailed | enterprise
 
 ${chalk.bold('EXAMPLES')}
   autospec init
@@ -240,10 +222,10 @@ async function getChangedFiles(projectRoot) {
     const result = execSync('git diff --name-only HEAD~1', {
       cwd: projectRoot,
       encoding: 'utf-8',
+      timeout: 5_000,
     });
     return result.trim().split('\n').filter(Boolean);
   } catch {
-    // Not a git repo or no previous commit — treat everything as changed
     return [];
   }
 }

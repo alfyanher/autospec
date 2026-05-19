@@ -21,7 +21,7 @@ const DEFAULT_CONFIG = {
   ],
   settings: {
     tone: 'concise',
-    update_on: 'manual',
+    update_on: 'commit',
     ignore: [
       'node_modules/',
       'dist/',
@@ -65,16 +65,11 @@ export async function initConfig(projectRoot) {
     },
   });
 
-  let yamlContent;
-  try {
-    yamlContent = YAML.stringify(config, { indent: 2 });
-  } catch (err) {
-    throw new Error(`Failed to serialize config: ${err.message}`);
-  }
+  const yamlContent = YAML.stringify(config, { indent: 2 });
 
   const header = `# AutoSpec Configuration
-# Docs: https://github.com/autospec/autospec
-# Regenerate: npx autospec generate
+# Docs: https://github.com/alfyanher/autospec
+# Regenerate: autospec generate
 # ---
 
 `;

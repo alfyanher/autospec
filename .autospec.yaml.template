@@ -1,26 +1,60 @@
 # AutoSpec Configuration
-# Docs: https://github.com/autospec/autospec
-# Regenerate: npx autospec generate
+# Docs: https://github.com/alfyanher/autospec
+# Regenerate: autospec generate
 # ---
 
 version: 1
 
 project:
+  # Auto-detected from package.json, Cargo.toml, or directory name
   name: your-project-name
-  type: auto-detected   # api | cli | library | webapp | monorepo | general
 
+  # Detected from directory structure. Affects doc prioritization.
+  # Options: api | cli | library | webapp | monorepo | general
+  #
+  # api      — has routes/, controllers/, or endpoints/
+  # cli       — has bin/ or cmd/
+  # library   — has lib/
+  # webapp    — has pages/, app/, or components/
+  # monorepo  — has packages/ or apps/
+  # general   — fallback for everything else
+  type: general
+
+# Which documents to generate. Comment out any you don't need.
+# 'api' is automatically skipped if no route definitions are detected.
 generate:
-  - architecture
-  - onboarding
-  - decisions
-  - components
-  - api           # Only generated if routes are detected
-  - dependencies
-  - claude
+  - architecture    # ARCHITECTURE.md — system overview + diagrams
+  - onboarding      # ONBOARDING.md  — zero-to-productive guide
+  - decisions       # DECISIONS.md   — inferred architectural decisions (ADR-style)
+  - components      # COMPONENTS.md  — component map + dependency graph
+  - api             # API.md         — endpoint reference (skipped if no routes found)
+  - dependencies    # DEPENDENCIES.md — why each dependency exists
+  - claude          # CLAUDE.md      — context card for Claude Code (written to repo root)
 
 settings:
-  tone: concise         # concise | detailed | enterprise
-  update_on: manual     # manual | commit | push | both
+  # Writing style for all generated docs
+  # concise    = dense bullet points, tables, minimal prose
+  # detailed   = full paragraphs, more context, better for onboarding-heavy projects
+  # enterprise = formal tone, compliance-friendly language
+  tone: concise
+
+  # When to auto-regenerate docs via the git hook
+  # commit = after every commit (default)
+  # push   = before every push (slower but less intrusive)
+  # both   = both hooks active
+  # manual = no hooks — only regenerate when you run `autospec generate`
+  update_on: commit
+
+  # Maximum directory depth to traverse when building the file tree.
+  # Increase for deeply nested monorepos. Decrease for faster scans.
+  max_depth: 4
+
+  # Include git log (last 50 commits) in context.
+  # Helps AutoSpec infer architectural decisions from commit history.
+  include_git_history: true
+
+  # Paths to exclude from scanning. Supports glob patterns.
+  # These are in addition to .gitignore entries (which are always respected).
   ignore:
     - node_modules/
     - dist/
@@ -29,5 +63,7 @@ settings:
     - "*.test.*"
     - "*.spec.*"
     - __tests__/
-  max_depth: 4
-  include_git_history: true
+    # Add more as needed:
+    # - vendor/
+    # - .cache/
+    # - "*.generated.*"
