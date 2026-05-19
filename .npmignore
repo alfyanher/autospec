@@ -1,0 +1,5 @@
+# files[] in package.json controls what's published.
+# .npmignore only needed to exclude things files[] would otherwise pick up.
+scripts/
+.github/
+.gitignore
