@@ -1,0 +1,24 @@
+{
+  "name": "autospec",
+  "version": "0.1.0",
+  "description": "Living documentation powered by Claude Code. One command. Always current.",
+  "bin": {
+    "autospec": "./bin/autospec.js"
+  },
+  "scripts": {
+    "start": "node bin/autospec.js",
+    "test": "node --test src/**/*.test.js"
+  },
+  "keywords": ["documentation", "claude", "ai", "developer-tools", "dx"],
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "ignore": "^5.3.0",
+    "yaml": "^2.3.0",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.0"
+  }
+}

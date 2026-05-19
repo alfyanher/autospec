@@ -1,0 +1,145 @@
+name: AutoSpec — Living Documentation
+
+on:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - '.autospec/**'
+      - 'CLAUDE.md'
+  pull_request:
+    branches: [main, master]
+    paths-ignore:
+      - '.autospec/**'
+      - 'CLAUDE.md'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install AutoSpec
+        run: npm install -g autospec
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Generate Documentation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -f ".autospec.yaml" ]; then
+            autospec generate --changed
+          else
+            autospec init --no-hooks
+          fi
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet .autospec/ CLAUDE.md || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit updated documentation
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "AutoSpec Bot"
+          git config user.email "autospec[bot]@users.noreply.github.com"
+          git add .autospec/ CLAUDE.md
+          git commit -m "docs(autospec): update living documentation [skip ci]"
+          git push
+
+  doc-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install -g autospec @anthropic-ai/claude-code
+
+      - name: Generate documentation for PR
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: autospec generate --changed
+
+      - name: Compute doc diff
+        id: doc-diff
+        run: |
+          DIFF=$(git diff .autospec/ CLAUDE.md)
+          if [ -n "$DIFF" ]; then
+            echo "has_diff=true" >> $GITHUB_OUTPUT
+            echo "$DIFF" | head -200 > /tmp/doc-diff.txt
+          fi
+
+      - name: Comment on PR
+        if: steps.doc-diff.outputs.has_diff == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const diff = fs.readFileSync('/tmp/doc-diff.txt', 'utf-8');
+
+            const body = `## 📝 AutoSpec: Documentation Impact
+
+            This PR would cause the following documentation updates:
+
+            <details>
+            <summary>View documentation changes</summary>
+
+            \`\`\`diff
+            ${diff}
+            \`\`\`
+
+            </details>
+
+            > These changes will be auto-committed when this PR is merged.
+            > Run \`autospec generate\` locally to preview the full output.`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.body.includes('AutoSpec: Documentation Impact')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

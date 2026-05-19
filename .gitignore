@@ -1,0 +1,4 @@
+node_modules/
+.autospec/
+*.cast
+scripts/demo.gif

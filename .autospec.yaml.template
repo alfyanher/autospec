@@ -1,0 +1,33 @@
+# AutoSpec Configuration
+# Docs: https://github.com/autospec/autospec
+# Regenerate: npx autospec generate
+# ---
+
+version: 1
+
+project:
+  name: your-project-name
+  type: auto-detected   # api | cli | library | webapp | monorepo | general
+
+generate:
+  - architecture
+  - onboarding
+  - decisions
+  - components
+  - api           # Only generated if routes are detected
+  - dependencies
+  - claude
+
+settings:
+  tone: concise         # concise | detailed | enterprise
+  update_on: manual     # manual | commit | push | both
+  ignore:
+    - node_modules/
+    - dist/
+    - build/
+    - coverage/
+    - "*.test.*"
+    - "*.spec.*"
+    - __tests__/
+  max_depth: 4
+  include_git_history: true

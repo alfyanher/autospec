@@ -1,0 +1,71 @@
+name: 'AutoSpec'
+description: 'Generate living documentation using Claude Code'
+author: 'autospec'
+
+branding:
+  icon: 'book-open'
+  color: 'blue'
+
+inputs:
+  anthropic-api-key:
+    description: 'Anthropic API key for Claude Code'
+    required: true
+  mode:
+    description: 'Generation mode: full | changed | diff-only'
+    default: 'changed'
+  docs:
+    description: 'Comma-separated list of docs to generate'
+    default: 'all'
+  commit:
+    description: 'Auto-commit generated docs'
+    default: 'true'
+  tone:
+    description: 'Documentation tone: concise | detailed | enterprise'
+    default: 'concise'
+
+outputs:
+  generated:
+    description: 'List of generated document files'
+  changed:
+    description: 'Whether any docs were updated'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install tools
+      shell: bash
+      run: |
+        npm install -g autospec @anthropic-ai/claude-code
+
+    - name: Run AutoSpec
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+      run: |
+        ARGS=""
+        if [ "${{ inputs.mode }}" = "changed" ]; then
+          ARGS="--changed"
+        fi
+        if [ "${{ inputs.docs }}" != "all" ]; then
+          ARGS="$ARGS --docs ${{ inputs.docs }}"
+        fi
+        if [ "${{ inputs.tone }}" != "concise" ]; then
+          ARGS="$ARGS --tone ${{ inputs.tone }}"
+        fi
+
+        autospec generate $ARGS
+
+    - name: Check and commit
+      shell: bash
+      if: inputs.commit == 'true'
+      run: |
+        if git diff --quiet .autospec/ CLAUDE.md 2>/dev/null; then
+          echo "changed=false" >> $GITHUB_OUTPUT
+        else
+          echo "changed=true" >> $GITHUB_OUTPUT
+          git config user.name "AutoSpec Bot"
+          git config user.email "autospec[bot]@users.noreply.github.com"
+          git add .autospec/ CLAUDE.md
+          git commit -m "docs(autospec): update living documentation [skip ci]"
+          git push
+        fi
