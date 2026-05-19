@@ -1,233 +1,265 @@
 # AutoSpec
 
-**Living documentation powered by Claude Code. One command. Always current.**
+### Your codebase already knows everything. AutoSpec just writes it down.
+
+Every developer has inherited a codebase with no docs, a README from 2 years ago, and architecture knowledge locked inside one person's head. AutoSpec fixes that permanently — run one command, get a complete documentation suite generated directly from your code. Add a git hook and it stays current automatically on every commit, forever.
+
+**Built for developers who use Claude Code and want it to actually understand their project.**
 
 [![license](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](package.json)
-[![claude](https://img.shields.io/badge/powered%20by-Claude%20Code-blueviolet.svg)](https://claude.ai/code)
-
-AutoSpec analyzes your codebase and generates a complete documentation suite using Claude Code. Run it once to bootstrap — it stays current automatically on every commit.
+[![powered by](https://img.shields.io/badge/powered%20by-Claude%20Code-blueviolet.svg)](https://claude.ai/code)
 
 ---
 
-## 📄 What gets generated
+## The problem
 
-All documents live in `.autospec/` and are always regenerated from source — never edited by hand.
+You join a codebase. There's a README that says "run `npm install`". No architecture diagram. No explanation of why the database schema looks like that. No guide for where to add a new endpoint. You spend your first week asking questions that the code could answer itself — if only someone had written them down.
+
+Or you're a solo developer. Your project makes perfect sense in your head. Six months later, even you can't remember why you made certain decisions.
+
+**Documentation rots because writing it is manual work. AutoSpec makes it automatic.**
+
+---
+
+## What you get in 30 seconds
+
+Run `autospec init` on any codebase and get:
 
 | File | What's inside |
 |------|--------------|
-| `ARCHITECTURE.md` | System overview, Mermaid component diagram, data flow, design patterns, extension points |
-| `ONBOARDING.md` | Prerequisites, quick-start steps, env vars, common commands, pitfalls |
-| `DECISIONS.md` | Inferred architectural decision records (ADR-style) with evidence citations |
-| `COMPONENTS.md` | Component map with dependency graph and coupling analysis |
-| `API.md` | Endpoint reference with request/response shapes *(only generated if routes are detected)* |
-| `DEPENDENCIES.md` | Why each dependency exists, overlap analysis, unused package detection |
-| `CLAUDE.md` | Context card for Claude Code — written to your repo root |
+| `.autospec/ARCHITECTURE.md` | System overview, Mermaid component diagram, data flow, key design patterns |
+| `.autospec/ONBOARDING.md` | Prerequisites, quick-start steps, env setup, common pitfalls |
+| `.autospec/DECISIONS.md` | Inferred architectural decision records with evidence citations |
+| `.autospec/COMPONENTS.md` | Component map with dependency graph and coupling analysis |
+| `.autospec/API.md` | Endpoint reference with request/response shapes *(when routes detected)* |
+| `.autospec/DEPENDENCIES.md` | Why each dependency exists, what could replace it, unused packages |
+| `CLAUDE.md` | Context card for Claude Code — makes AI assistance dramatically more accurate |
+
+> [!NOTE]
+> **Real example output** from the included demo project:
+>
+> ```markdown
+> ### ADR-001: Express over Fastify
+> | Field | Value |
+> |-------|-------|
+> | Status | active |
+> | Evidence | src/index.js:1 — `import express from 'express'` |
+>
+> **Context:** REST API with middleware pipeline. Team familiarity with Express ecosystem.
+> **Alternatives not chosen:** Fastify, Koa, Hono
+> **Trade-offs:** Larger bundle, slower cold start — offset by ecosystem maturity.
+> ```
 
 ---
 
-## ⚡ Requirements
+## Setup
 
 > [!IMPORTANT]
-> You need two things before running AutoSpec:
-> 1. **Claude Code CLI** — `npm install -g @anthropic-ai/claude-code`
-> 2. **Anthropic API key** — `export ANTHROPIC_API_KEY=sk-...` or run `claude login`
+> **Two prerequisites:**
+> 1. Install Claude Code CLI: `npm install -g @anthropic-ai/claude-code`
+> 2. Authenticate: `claude login` (or set `ANTHROPIC_API_KEY` env var)
 
-- Node.js 18+
+```bash
+npm install -g autospec
+```
 
 ---
 
-## 🚀 Quick start
+## Quick start
 
 ```bash
-# Install
-npm install -g autospec
-
-# Run on any project
 cd your-project
 autospec init
 ```
 
-AutoSpec will:
-1. Detect your project type and create `.autospec.yaml`
-2. Scan your codebase (respects `.gitignore`, skips binaries, estimates token usage)
-3. Call Claude Code once per document
-4. Write all docs to `.autospec/` and `CLAUDE.md` to your repo root
-5. Install a `post-commit` git hook so docs stay current automatically
+That's it. In under a minute you'll have a complete `.autospec/` folder and a `CLAUDE.md` at your repo root. The `CLAUDE.md` is what makes Claude Code understand *your specific project* — not just the language or framework, but your conventions, your architecture, your do's and don'ts.
 
 ---
 
-## 🛠 Commands
+## Keep docs current automatically
+
+During `init`, AutoSpec installs a `post-commit` git hook. After that, every commit automatically regenerates only the docs affected by what changed:
 
 ```bash
-autospec init                              # First-time setup
-autospec generate                          # Regenerate everything
-autospec generate --changed                # Only update docs for files changed since last commit
-autospec generate --docs architecture,onboarding  # Selective regeneration
-autospec hook install                      # (Re)install git hooks
-autospec hook remove                       # Remove git hooks
-autospec help                              # Show all commands
+# Make a change to your routes
+git commit -m "feat: add /api/v1/payments endpoint"
+# → AutoSpec silently updates API.md and ARCHITECTURE.md in the background
+# → Stages the updated docs into the same commit
+```
+
+To update manually at any time:
+
+```bash
+autospec generate          # Regenerate everything
+autospec generate --changed  # Only update docs for files changed since last commit (fast)
+```
+
+> [!TIP]
+> `--changed` uses `git diff HEAD~1` to detect what changed. On a large codebase it's 3-5x faster than a full regeneration.
+
+---
+
+## All commands
+
+```bash
+autospec init                                     # First-time setup
+autospec generate                                 # Regenerate all docs
+autospec generate --changed                       # Fast incremental update
+autospec generate --docs architecture,onboarding  # Generate specific docs only
+autospec hook install                             # Re-install git hooks
+autospec hook remove                              # Remove git hooks
+autospec help                                     # Show all options
 ```
 
 ### Options
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--path <dir>` | `.` | Project root to analyze |
+| `--path <dir>` | `.` | Project root (default: current directory) |
 | `--no-hooks` | — | Skip hook installation during `init` |
-| `--quiet` | — | Suppress non-error output (for CI/hooks) |
+| `--quiet` | — | No output except errors (for CI use) |
 | `--docs <list>` | all | Comma-separated doc IDs to generate |
 | `--tone <style>` | `concise` | `concise` \| `detailed` \| `enterprise` |
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-`.autospec.yaml` is created automatically by `autospec init`. Edit it to control what gets generated:
+`autospec init` creates `.autospec.yaml`. Most projects work with defaults — only edit it if you want to customize:
 
 ```yaml
 version: 1
 
 project:
   name: my-app
-  # Detected automatically. Affects which docs are prioritized.
-  # Options: api | cli | library | webapp | monorepo | general
-  type: api
+  type: api       # api | cli | library | webapp | monorepo | general
 
 generate:
   - architecture
   - onboarding
   - decisions
   - components
-  # - api         # Auto-included only when routes are detected
   - dependencies
   - claude
+  # - api         # Auto-included only when routes are detected
 
 settings:
-  # concise = dense, bullet-heavy  |  detailed = prose-heavy  |  enterprise = formal
-  tone: concise
-
-  # When to auto-regenerate: commit | push | both | manual
-  update_on: commit
-
-  # How deep to traverse directories for the file tree (default: 4)
+  tone: concise           # concise | detailed | enterprise
+  update_on: commit       # commit | push | both | manual
   max_depth: 4
-
-  # Include git log in context — helps infer decisions and history
   include_git_history: true
-
-  # Paths to exclude from scanning (supports glob patterns)
   ignore:
     - node_modules/
     - dist/
-    - build/
-    - coverage/
     - "*.test.*"
     - vendor/
 ```
 
-> [!TIP]
-> `--changed` detects changed files using `git diff HEAD~1`. It regenerates all docs (not just docs for changed files) but with a smaller context window, making it significantly faster.
-
 ---
 
-## 🔁 GitHub Actions
+## GitHub Actions
 
-### Drop-in workflow
-
-Copy [`.github/workflows/autospec.yml`](.github/workflows/autospec.yml) into your repo and add `ANTHROPIC_API_KEY` to your repository secrets. It will:
-
-- Auto-commit updated docs to `main` on every push
-- Comment on pull requests showing what documentation would change
-
-### Reusable action
+Automatically keep docs current on every push to `main` — no local tooling required for your team:
 
 ```yaml
-steps:
-  - uses: actions/checkout@v4
-  - uses: autospec/autospec@v1
-    with:
-      anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
-      mode: changed      # full | changed
-      tone: concise
-      commit: 'true'     # auto-commit generated docs
+# .github/workflows/autospec.yml
+- uses: autospec/autospec@v1
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    mode: changed     # full | changed
+    commit: 'true'    # auto-commit generated docs
 ```
+
+On pull requests, AutoSpec comments with a preview of what the docs would look like after merge.
+
+See the full workflow in [`.github/workflows/autospec.yml`](.github/workflows/autospec.yml).
 
 ---
 
-## 🏗 How it works
+## Works with any language
+
+AutoSpec doesn't parse your code — it reads it as text and lets Claude reason about it. That means it works with any language or framework:
+
+- **Node.js / TypeScript** (Express, Fastify, NestJS, Next.js)
+- **Python** (Django, FastAPI, Flask)
+- **Go**, **Rust**, **Java**, **Ruby on Rails**
+- **Monorepos** (Turborepo, Nx, Lerna)
+- Mixed-language projects
+
+---
+
+## How it works under the hood
 
 ```
 autospec init
     │
-    ├─ scanner.js     Walks file tree, reads source + config files,
-    │                 extracts imports, detects routes, estimates tokens.
-    │                 Respects .gitignore. Skips binary files.
+    ├─ scanner.js     Walks your file tree (respects .gitignore, skips binaries).
+    │                 Reads source files, extracts imports, detects routes.
+    │                 Estimates token usage — warns if context is large.
     │
-    ├─ generator.js   Fills 7 prompt templates with scanned context,
-    │                 calls `claude -p` once per document via stdin.
+    ├─ generator.js   Fills 7 prompt templates with extracted context.
+    │                 Calls `claude -p` once per document (stdin pipe).
     │                 Partial failures don't abort remaining docs.
     │
-    └─ .autospec/     ARCHITECTURE.md, ONBOARDING.md, DECISIONS.md ...
-       CLAUDE.md      Written to repo root for Claude Code to pick up.
+    └─ .autospec/     Markdown files written here.
+       CLAUDE.md      Written to repo root — picked up by Claude Code automatically.
 ```
+
+The prompt templates in [`prompts/`](prompts/) are plain markdown files you can edit. Change the tone, add project-specific instructions, or contribute improvements back.
 
 ---
 
-## 🧩 Customize the prompts
-
-Every prompt lives in [`prompts/`](prompts/) as a plain markdown file with `{{PLACEHOLDER}}` variables. They're intentionally separate from the code so you can tune them for your team:
-
-```
-prompts/
-├── architecture.md    Controls ARCHITECTURE.md output
-├── onboarding.md      Controls ONBOARDING.md output
-├── decisions.md       Controls DECISIONS.md output
-├── components.md      Controls COMPONENTS.md output
-├── api.md             Controls API.md output
-├── dependencies.md    Controls DEPENDENCIES.md output
-└── claude-context.md  Controls CLAUDE.md output
-```
-
-Edit any prompt and run `autospec generate` to see the result. The output format contract in each prompt tells Claude exactly what sections to emit and in what order.
-
----
-
-## 🛡 Edge cases handled
-
-> [!NOTE]
-> AutoSpec is designed to degrade gracefully — a broken environment produces warnings, not crashes.
+## Edge cases handled
 
 | Scenario | Behavior |
 |----------|----------|
-| Large repos (>80k tokens) | Warns with token estimate; prompts truncated at 100k chars |
+| Large repos (>80k tokens) | Warns with estimate; context truncated at 100k chars |
 | Binary files | Skipped via extension list + null-byte detection |
-| Non-git projects | Git history marked unavailable; hooks skipped gracefully |
-| Windows | Hooks skipped with explanation; paths normalized; `type` used instead of `cat` |
-| Partial failures | One failed doc doesn't abort the rest; failures listed at end |
-| Existing git hooks | AutoSpec appends rather than overwriting |
-| Malformed `.autospec.yaml` | Clear error with location, not a stack trace |
-| Claude not installed | Detected before scanning begins, with install instructions |
-| Claude not authenticated | Detected before scanning begins, with login instructions |
+| Non-git projects | Git history skipped gracefully; hooks skipped with explanation |
+| Windows | Hooks skipped (use GitHub Action instead); paths normalized |
+| Partial doc failures | Remaining docs continue; failures listed at end |
+| Existing git hooks | AutoSpec appends rather than overwrites |
+| Claude not installed | Caught before scanning begins, with install command |
+| Claude not authenticated | Caught before scanning begins, with login command |
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 > [!WARNING]
-> **"Claude CLI not found"** — Run `npm install -g @anthropic-ai/claude-code` then `claude login`.
+> **"Claude CLI not found"**
+> Run: `npm install -g @anthropic-ai/claude-code` then `claude login`
 
 > [!WARNING]
-> **"Claude CLI is not authenticated"** — Run `claude login` and follow the browser prompt.
+> **Generation timed out**
+> Your project is too large for a single context. Add directories to `ignore` in `.autospec.yaml`.
 
 > [!WARNING]
-> **Generation timed out** — Your project context is too large. Add directories to the `ignore` list in `.autospec.yaml` and try again.
+> **Windows: hooks skipped**
+> Git hooks require `chmod` — not available on Windows. Use the GitHub Action for automatic updates.
 
 > [!WARNING]
-> **Windows: hooks skipped** — Git hooks require `chmod` which isn't available on Windows. Use the GitHub Action instead for automatic updates.
+> **"No .autospec.yaml found"**
+> You need to run `autospec init` before `autospec generate`.
 
 ---
 
-## 📄 License
+## Who this is for
+
+**AutoSpec works best for:**
+- Codebases 6 months or older with minimal documentation
+- Teams onboarding new developers regularly
+- Solo developers using Claude Code who want accurate AI assistance
+- Projects that move fast and can't afford manual doc maintenance
+
+**AutoSpec is not ideal for:**
+- Brand-new greenfield projects (there's nothing to infer yet)
+- Projects smaller than ~10 source files
+- Codebases with existing, well-maintained documentation
+
+---
+
+## License
 
 Copyright © 2026 Alfonso Yanez Herrera. All rights reserved. See [LICENSE](LICENSE).

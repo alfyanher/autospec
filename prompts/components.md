@@ -61,10 +61,12 @@ graph TD
 
 Group files into logical components using these signals (in priority order):
 1. Top-level directories in `src/` or the project root
-2. Import cluster analysis — files that heavily import each other form a component
+2. Import clusters — files where 3 or more files import each other form a component
 3. Naming conventions — `*Controller`, `*Service`, `*Repository`, `*Store`, `*Router`
 
-Aim for 5–15 components. Do not create a component per file.
+Target 5–15 components total. Never create a 1-file component unless that file is a clear standalone module (e.g., a single-file CLI entry point).
+
+If the project has fewer than 5 logical groupings, emit what exists — do not pad. If the project is a monorepo, treat each top-level package as a component and note its sub-components briefly.
 
 ## Quality Rules
 

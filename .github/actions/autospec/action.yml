@@ -1,6 +1,6 @@
 name: 'AutoSpec'
 description: 'Generate living documentation using Claude Code'
-author: 'autospec'
+author: 'Alfonso Yanez Herrera'
 
 branding:
   icon: 'book-open'
@@ -11,13 +11,13 @@ inputs:
     description: 'Anthropic API key for Claude Code'
     required: true
   mode:
-    description: 'Generation mode: full | changed | diff-only'
+    description: 'Generation mode: full | changed'
     default: 'changed'
   docs:
-    description: 'Comma-separated list of docs to generate'
+    description: 'Comma-separated list of docs to generate (default: all)'
     default: 'all'
   commit:
-    description: 'Auto-commit generated docs'
+    description: 'Auto-commit generated docs (true/false)'
     default: 'true'
   tone:
     description: 'Documentation tone: concise | detailed | enterprise'
@@ -25,26 +25,30 @@ inputs:
 
 outputs:
   generated:
-    description: 'List of generated document files'
+    description: 'Comma-separated list of generated document filenames'
   changed:
-    description: 'Whether any docs were updated'
+    description: 'Whether any docs were updated (true/false)'
 
 runs:
   using: 'composite'
   steps:
     - name: Install tools
       shell: bash
-      run: |
-        npm install -g autospec @anthropic-ai/claude-code
+      run: npm install -g autospec @anthropic-ai/claude-code
 
     - name: Run AutoSpec
       shell: bash
       env:
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
       run: |
-        ARGS=""
+        # Init if no config exists
+        if [ ! -f ".autospec.yaml" ]; then
+          autospec init --no-hooks --quiet
+        fi
+
+        ARGS="--quiet"
         if [ "${{ inputs.mode }}" = "changed" ]; then
-          ARGS="--changed"
+          ARGS="$ARGS --changed"
         fi
         if [ "${{ inputs.docs }}" != "all" ]; then
           ARGS="$ARGS --docs ${{ inputs.docs }}"
@@ -55,7 +59,7 @@ runs:
 
         autospec generate $ARGS
 
-    - name: Check and commit
+    - name: Check for changes and commit
       shell: bash
       if: inputs.commit == 'true'
       run: |

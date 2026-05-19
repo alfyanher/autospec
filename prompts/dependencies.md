@@ -44,11 +44,17 @@ Emit exactly these sections in this order.
 
 - `package-name` — [last usage guess or "no imports found"]
 
-## Security Notes
+## Security & Deprecation Notes
 
 > Based on knowledge cutoff. Run `npm audit` for current advisories.
 
-- [any known-problematic packages, or "> No known issues detected."]
+- Flag packages that are: known security issues, officially deprecated (with recommended replacement), or unmaintained (no releases in 2+ years).
+- If none apply: `> No known issues detected at time of generation.`
+
+## License Notes
+
+- Flag non-permissive licenses (GPL, AGPL, SSPL) that could affect distribution.
+- If all permissive: `> All detected dependencies use permissive licenses.`
 
 ## Overlap & Redundancy
 

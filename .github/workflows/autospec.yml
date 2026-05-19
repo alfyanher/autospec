@@ -32,26 +32,23 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install AutoSpec
-        run: npm install -g autospec
-
-      - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
+      - name: Install AutoSpec and Claude Code CLI
+        run: npm install -g autospec @anthropic-ai/claude-code
 
       - name: Generate Documentation
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           if [ -f ".autospec.yaml" ]; then
-            autospec generate --changed
+            autospec generate --changed --quiet
           else
-            autospec init --no-hooks
+            autospec init --no-hooks --quiet
           fi
 
       - name: Check for changes
         id: changes
         run: |
-          git diff --quiet .autospec/ CLAUDE.md || echo "changed=true" >> $GITHUB_OUTPUT
+          git diff --quiet .autospec/ CLAUDE.md 2>/dev/null || echo "changed=true" >> $GITHUB_OUTPUT
 
       - name: Commit updated documentation
         if: steps.changes.outputs.changed == 'true'
@@ -77,21 +74,28 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: Install AutoSpec and Claude Code CLI
         run: npm install -g autospec @anthropic-ai/claude-code
 
       - name: Generate documentation for PR
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: autospec generate --changed
+        run: |
+          if [ -f ".autospec.yaml" ]; then
+            autospec generate --changed --quiet
+          else
+            autospec init --no-hooks --quiet
+          fi
 
       - name: Compute doc diff
         id: doc-diff
         run: |
-          DIFF=$(git diff .autospec/ CLAUDE.md)
+          DIFF=$(git diff .autospec/ CLAUDE.md 2>/dev/null || true)
           if [ -n "$DIFF" ]; then
             echo "has_diff=true" >> $GITHUB_OUTPUT
             echo "$DIFF" | head -200 > /tmp/doc-diff.txt
+          else
+            echo "has_diff=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Comment on PR
@@ -104,7 +108,7 @@ jobs:
 
             const body = `## 📝 AutoSpec: Documentation Impact
 
-            This PR would cause the following documentation updates:
+            This PR would update the following documentation:
 
             <details>
             <summary>View documentation changes</summary>
@@ -115,7 +119,7 @@ jobs:
 
             </details>
 
-            > These changes will be auto-committed when this PR is merged.
+            > Changes will be auto-committed when this PR is merged.
             > Run \`autospec generate\` locally to preview the full output.`;
 
             const { data: comments } = await github.rest.issues.listComments({

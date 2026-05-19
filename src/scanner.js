@@ -9,9 +9,10 @@ const SOURCE_EXTENSIONS = new Set([
 ]);
 
 const BINARY_EXTENSIONS = new Set([
-  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.svg',
+  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico',
   '.pdf', '.zip', '.tar', '.gz', '.wasm', '.bin', '.exe',
   '.ttf', '.woff', '.woff2', '.eot', '.mp4', '.mp3', '.wav',
+  '.db', '.sqlite', '.lock',
 ]);
 
 const CONFIG_FILES = [
@@ -23,7 +24,6 @@ const CONFIG_FILES = [
 
 const MAX_FILE_SIZE = 50_000;
 const MAX_FILES_CONTENT = 30;
-// Rough token estimate: 1 token ≈ 4 chars
 const CHARS_PER_TOKEN = 4;
 
 export async function scanProject(projectRoot, config) {
@@ -36,7 +36,7 @@ export async function scanProject(projectRoot, config) {
     // No .gitignore — that's fine
   }
 
-  ig.add(['node_modules', '.git', '.autospec', 'dist', 'build', 'coverage', '*.lock']);
+  ig.add(['node_modules', '.git', '.autospec', 'dist', 'build', 'coverage']);
 
   if (Array.isArray(config.settings?.ignore)) {
     ig.add(config.settings.ignore);
@@ -56,7 +56,8 @@ export async function scanProject(projectRoot, config) {
     tokenEstimate: 0,
   };
 
-  const tree = await buildFileTree(projectRoot, ig, '', 0, config.settings?.max_depth ?? 4);
+  const maxDepth = config.settings?.max_depth ?? 4;
+  const tree = await buildFileTree(projectRoot, ig, '', 0, maxDepth);
   context.fileTree = tree.text;
   context.fileCount = tree.fileCount;
   context.dirCount = tree.dirCount;
@@ -69,31 +70,26 @@ export async function scanProject(projectRoot, config) {
 
   for (const file of prioritized) {
     if (context.sourceFiles.length >= MAX_FILES_CONTENT) break;
-
-    // Skip known binary extensions without reading
     if (BINARY_EXTENSIONS.has(extname(file))) continue;
 
     try {
       const content = await readFile(join(projectRoot, file), 'utf-8');
-
-      // Skip binary files that slipped through (detect null bytes)
-      if (hasBinaryContent(content)) continue;
-
-      if (content.length > MAX_FILE_SIZE) continue;
+      if (hasBinaryContent(content) || content.length > MAX_FILE_SIZE) continue;
 
       totalChars += content.length;
-      context.sourceFiles.push({ path: normalizePath(file), content });
+      const normalizedPath = normalizePath(file);
+      context.sourceFiles.push({ path: normalizedPath, content });
 
       if (isRouteFile(file, content)) {
-        context.routeFiles.push({ path: normalizePath(file), content });
+        context.routeFiles.push({ path: normalizedPath, content });
       }
 
       const imports = extractImports(content);
       if (imports.length > 0) {
-        context.importMap.push({ file: normalizePath(file), imports });
+        context.importMap.push({ file: normalizedPath, imports });
       }
     } catch {
-      // Permission error, symlink loop, etc. — skip silently
+      // Permission error, broken symlink, etc. — skip silently
     }
   }
 
@@ -153,9 +149,7 @@ async function buildFileTree(dir, ig, prefix, depth, maxDepth) {
     if (entry.isDirectory()) {
       dirCount++;
       text += `${relativePath}/\n`;
-      const sub = await buildFileTree(
-        join(dir, entry.name), ig, relativePath, depth + 1, maxDepth
-      );
+      const sub = await buildFileTree(join(dir, entry.name), ig, relativePath, depth + 1, maxDepth);
       text += sub.text;
       fileCount += sub.fileCount;
       dirCount += sub.dirCount;
@@ -213,11 +207,10 @@ function prioritizeFiles(files) {
   ];
 
   return files.sort((a, b) => {
-    const aScore = priority.findIndex((p) => p.test(a));
-    const bScore = priority.findIndex((p) => p.test(b));
-    const aPriority = aScore === -1 ? priority.length : aScore;
-    const bPriority = bScore === -1 ? priority.length : bScore;
-    return aPriority - bPriority;
+    const aPriority = priority.findIndex((p) => p.test(a));
+    const bPriority = priority.findIndex((p) => p.test(b));
+    return (aPriority === -1 ? priority.length : aPriority) -
+           (bPriority === -1 ? priority.length : bPriority);
   });
 }
 
@@ -234,14 +227,18 @@ function isRouteFile(path, content) {
 
 function extractImports(content) {
   const imports = [];
-  const patterns = [
-    /import\s+(?:[\w{},\s*]+\s+from\s+)?['"](.+?)['"]/g,
-    /require\s*\(\s*['"](.+?)['"]\s*\)/g,
-    /from\s+([\w.]+)\s+import/g,
-  ];
 
-  for (const pattern of patterns) {
+  // ES module imports: import X from 'y', import { X } from 'y', import 'y'
+  const esImport = /import\s+(?:[\w{},\s*]+\s+from\s+)?['"](.+?)['"]/g;
+  // CommonJS: require('y')
+  const cjsRequire = /require\s*\(\s*['"](.+?)['"]\s*\)/g;
+  // Python: from x import y
+  const pyImport = /^from\s+([\w.]+)\s+import/gm;
+
+  for (const pattern of [esImport, cjsRequire, pyImport]) {
     let match;
+    // Reset lastIndex before each use of a global regex
+    pattern.lastIndex = 0;
     while ((match = pattern.exec(content)) !== null) {
       if (match[1]) imports.push(match[1]);
     }
@@ -251,13 +248,10 @@ function extractImports(content) {
 }
 
 function hasBinaryContent(str) {
-  // Check the first 8KB for null bytes — reliable binary detector
-  const sample = str.slice(0, 8192);
-  return sample.includes('\0');
+  return str.slice(0, 8192).includes('\0');
 }
 
 function normalizePath(p) {
-  // Normalize Windows backslashes to forward slashes for consistent output
   return p.replace(/\\/g, '/');
 }
 
@@ -270,6 +264,6 @@ async function getGitHistory(projectRoot) {
       timeout: 5_000,
     });
   } catch {
-    return 'Git history unavailable (not a git repo or no commits)';
+    return 'Git history unavailable (not a git repo or no commits yet)';
   }
 }
