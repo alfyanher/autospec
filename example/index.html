@@ -679,7 +679,7 @@
 <p><strong>Context:</strong> Modern Node.js projects benefit from static analysis, top-level <code>await</code>, and alignment with browser module standards. The project had no legacy CJS constraints.</p>
 <p><strong>Decision:</strong> Pure ES Modules (<code>import</code>/<code>export</code>) with no CommonJS <code>require()</code> anywhere in source.</p>
 <p><strong>Alternatives not chosen:</strong> CommonJS, mixed CJS/ESM with dual packaging</p>
-<p><strong>Trade-offs:</strong> Dynamic <code>import()</code> is required in a few places to avoid circular dependencies (<code>src/config.js</code>, <code>src/scanner.js</code>, <code>src/cli.js</code>), but static imports everywhere else enable tree-shaking and clearer dependency graphs.</p>
+<p><strong>Trade-offs:</strong> Static imports are used everywhere; a single dynamic <code>import()</code> remains in <code>src/cli.js</code> for the <code>getChangedFiles</code> helper. This keeps module resolution predictable and enables tree-shaking across the codebase.</p>
 <hr>
 <h3>ADR-003: Express as Web Framework (Demo Project)</h3>
 <table>
@@ -1000,7 +1000,7 @@
 <li><strong>Location:</strong> <code>src/config.js</code></li>
 <li><strong>Purpose:</strong> Loads and deep-merges <code>.autospec.yaml</code> against built-in defaults, and writes a template config on <code>init</code>.</li>
 <li><strong>Key files:</strong> <code>src/config.js</code></li>
-<li><strong>Exports:</strong> <code>loadConfig()</code>, <code>initConfig()</code>, <code>DEFAULT_CONFIG</code>.</li>
+<li><strong>Exports:</strong> <code>loadConfig()</code>, <code>initConfig()</code>, <code>deepMerge()</code>.</li>
 <li><strong>Owns state:</strong> no</li>
 <li><strong>Coupling notes:</strong></li>
 </ul>
@@ -1009,7 +1009,7 @@
 <li><strong>Location:</strong> <code>src/scanner.js</code></li>
 <li><strong>Purpose:</strong> Walks the target project&#39;s file tree, reads source content, and extracts import relationships to produce a structured context object.</li>
 <li><strong>Key files:</strong> <code>src/scanner.js</code></li>
-<li><strong>Exports:</strong> <code>scanProject()</code> — returns a context object consumed by Generator.</li>
+<li><strong>Exports:</strong> <code>scanProject()</code> — returns a context object consumed by Generator. Utility functions <code>normalizePath()</code>, <code>extractImports()</code>, <code>isRouteFile()</code>, <code>hasBinaryContent()</code>, <code>prioritizeFiles()</code> also exported for testing.</li>
 <li><strong>Owns state:</strong> no</li>
 <li><strong>Coupling notes:</strong> Uses the <code>ignore</code> package to honour <code>.gitignore</code> rules; otherwise self-contained and knows nothing about prompts or output.</li>
 </ul>
@@ -1018,7 +1018,7 @@
 <li><strong>Location:</strong> <code>src/generator.js</code></li>
 <li><strong>Purpose:</strong> Fills prompt templates with scanner context and invokes the <code>claude -p</code> CLI subprocess to produce documentation files.</li>
 <li><strong>Key files:</strong> <code>src/generator.js</code></li>
-<li><strong>Exports:</strong> <code>generateDocs()</code> — returns <code>{ generated, failures }</code>.</li>
+<li><strong>Exports:</strong> <code>generateDocs()</code> — returns <code>{ generated, failures }</code>. Internal utilities <code>fillTemplate()</code>, <code>truncatePrompt()</code>, <code>filterDocs()</code>, <code>resolveOutputPath()</code> also exported for testing.</li>
 <li><strong>Owns state:</strong> no</li>
 <li><strong>Coupling notes:</strong> Directly spawns <code>claude</code> as a child process; tightly coupled to the Claude CLI interface and prompt file format.</li>
 </ul>
