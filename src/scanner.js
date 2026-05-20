@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'fs/promises';
 import { join, extname } from 'path';
+import { execSync } from 'child_process';
 import ignore from 'ignore';
 
 const SOURCE_EXTENSIONS = new Set([
@@ -25,6 +26,8 @@ const CONFIG_FILES = [
 const MAX_FILE_SIZE = 50_000;
 const MAX_FILES_CONTENT = 30;
 const CHARS_PER_TOKEN = 4;
+
+export { normalizePath, extractImports, isRouteFile, hasBinaryContent, prioritizeFiles };
 
 export async function scanProject(projectRoot, config) {
   const ig = ignore();
@@ -256,7 +259,6 @@ function normalizePath(p) {
 }
 
 async function getGitHistory(projectRoot) {
-  const { execSync } = await import('child_process');
   try {
     return execSync('git log --oneline --no-merges -50', {
       cwd: projectRoot,

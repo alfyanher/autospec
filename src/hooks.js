@@ -1,4 +1,4 @@
-import { writeFile, readFile, chmod, mkdir, access } from 'fs/promises';
+import { writeFile, readFile, chmod, mkdir, access, unlink } from 'fs/promises';
 import { join } from 'path';
 
 const IS_WINDOWS = process.platform === 'win32';
@@ -114,8 +114,7 @@ export async function removeHooks(projectRoot) {
       if (cleaned && cleaned !== '#!/bin/sh') {
         await writeFile(hookPath, cleaned + '\n', 'utf-8');
       } else {
-        const { unlink } = await import('fs/promises');
-        await unlink(hookPath);
+          await unlink(hookPath);
       }
     } catch (err) {
       if (err.code !== 'ENOENT') {

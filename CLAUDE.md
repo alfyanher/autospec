@@ -15,7 +15,7 @@ node bin/autospec.js init
 node bin/autospec.js generate
 
 # Run tests (all)
-node --test src/**/*.test.js
+node --test src/scanner.test.js src/config.test.js src/generator.test.js
 
 # Run single test file
 node --test src/<module>.test.js

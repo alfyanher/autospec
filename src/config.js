@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile, readdir } from 'fs/promises';
 import { join } from 'path';
 import YAML from 'yaml';
 
@@ -35,6 +35,8 @@ const DEFAULT_CONFIG = {
     include_git_history: true,
   },
 };
+
+export { deepMerge };
 
 export async function loadConfig(projectRoot) {
   const configPath = join(projectRoot, '.autospec.yaml');
@@ -101,8 +103,6 @@ async function detectProjectName(projectRoot) {
 }
 
 async function detectProjectType(projectRoot) {
-  const { readdir } = await import('fs/promises');
-
   let entries;
   try {
     entries = await readdir(projectRoot);

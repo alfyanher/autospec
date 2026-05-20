@@ -4,15 +4,10 @@ Analyze the codebase context below and emit a single API.md document. Output onl
 
 ## Input Context
 
-Route/handler files:
+Route/handler files (includes any middleware applied at the router level):
 <route_files>
 {{ROUTE_FILES}}
 </route_files>
-
-Middleware:
-<middleware>
-{{MIDDLEWARE}}
-</middleware>
 
 Types/schemas/validation:
 <schemas>

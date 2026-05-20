@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "node bin/autospec.js",
-    "test": "node --test src/**/*.test.js"
+    "test": "node --test src/scanner.test.js src/config.test.js src/generator.test.js"
   },
   "keywords": [
     "documentation",

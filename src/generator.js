@@ -20,6 +20,8 @@ const DOC_CONFIGS = [
 const CLAUDE_TIMEOUT_MS = 120_000;
 const MAX_PROMPT_CHARS = 100_000;
 
+export { fillTemplate, truncatePrompt, filterDocs, resolveOutputPath };
+
 export async function generateDocs(projectRoot, context, config) {
   const outputDir = join(projectRoot, '.autospec');
   await mkdir(outputDir, { recursive: true });
@@ -158,7 +160,7 @@ function fillTemplate(template, context) {
     '{{ROUTE_FILES}}':      formatFiles(context.routeFiles),
     '{{MIDDLEWARE}}':       formatFiles(context.routeFiles),
     '{{SCHEMAS}}':          extractSchemas(context.sourceFiles),
-    '{{LOCK_SUMMARY}}':     context.packageManifest  || 'Not available',
+    '{{LOCK_SUMMARY}}':     formatLockSummary(context.packageManifest),
     '{{IMPORT_USAGE}}':     formatImportMap(context.importMap),
     '{{AUTOSPEC_DOCS}}':    'Initial generation — no prior docs available',
     '{{CODE_SAMPLES}}':     formatCodeSamples(context.sourceFiles),
@@ -238,6 +240,19 @@ function formatCodeSamples(files) {
     .slice(0, 5)
     .map((f) => `--- ${f.path} ---\n${f.content.slice(0, 2000)}`)
     .join('\n\n');
+}
+
+function formatLockSummary(packageManifest) {
+  if (!packageManifest) return 'Not available';
+  try {
+    const pkg = JSON.parse(packageManifest);
+    const all = { ...pkg.dependencies, ...pkg.devDependencies };
+    const entries = Object.entries(all);
+    if (entries.length === 0) return 'No dependencies found';
+    return entries.map(([name, ver]) => `${name}: ${ver}`).join('\n');
+  } catch {
+    return packageManifest;
+  }
 }
 
 function extractCIConfig(configFiles) {
