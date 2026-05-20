@@ -1,7 +1,8 @@
 import { readFile, writeFile, mkdir, unlink } from 'fs/promises';
-import { join, dirname } from 'path';
+import { join, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync, execFileSync } from 'child_process';
+import { generateHTMLReport } from './reporter.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROMPTS_DIR = join(__dirname, '..', 'prompts');
@@ -71,6 +72,15 @@ export async function generateDocs(projectRoot, context, config) {
     }, null, 2),
     'utf-8'
   );
+
+  const projectName = await extractProjectName(projectRoot);
+  const generatedAt = new Date().toISOString();
+  try {
+    await generateHTMLReport(outputDir, projectName, generated, generatedAt);
+    generated.push('index.html');
+  } catch (err) {
+    failures.push({ doc: 'index.html', error: err.message });
+  }
 
   return { generated, failures };
 }
@@ -245,4 +255,13 @@ function extractSchemas(sourceFiles) {
     .filter((f) => /schema|types?|model|validation|dto/i.test(f.path))
     .map((f) => `--- ${f.path} ---\n${f.content}`)
     .join('\n\n') || 'No schemas detected.';
+}
+
+async function extractProjectName(projectRoot) {
+  try {
+    const pkg = JSON.parse(await readFile(join(projectRoot, 'package.json'), 'utf-8'));
+    return pkg.name || basename(projectRoot);
+  } catch {
+    return basename(projectRoot);
+  }
 }
