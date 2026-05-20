@@ -10,6 +10,9 @@ Every developer has inherited a codebase with no docs, a README from 2 years ago
 [![node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](package.json)
 [![powered by](https://img.shields.io/badge/powered%20by-Claude%20Code-blueviolet.svg)](https://claude.ai/code)
 
+> [!TIP]
+> **See it live:** [example/index.html](example/index.html) — AutoSpec documenting itself. Open the file in your browser to see the full documentation portal.
+
 ---
 
 ## The problem

@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>autospec — AutoSpec Docs</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #a78bfa;
+      --accent-dim: #6d28d9;
+      --link: #58a6ff;
+      --code-bg: #1c2128;
+      --th-bg: #161b22;
+      --callout-note-bg: #1f2d3d;
+      --callout-note-border: #388bfd;
+      --callout-note-text: #79c0ff;
+      --callout-tip-bg: #1a2d22;
+      --callout-tip-border: #3fb950;
+      --callout-tip-text: #56d364;
+      --callout-warning-bg: #2d2008;
+      --callout-warning-border: #d29922;
+      --callout-warning-text: #e3b341;
+      --callout-caution-bg: #2d1517;
+      --callout-caution-border: #f85149;
+      --callout-caution-text: #ff7b72;
+      --callout-important-bg: #271d3f;
+      --callout-important-border: #a371f7;
+      --callout-important-text: #d2a8ff;
+    }
+
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --surface: #f6f8fa;
+      --surface2: #eaeef2;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --muted: #656d76;
+      --accent: #7c3aed;
+      --accent-dim: #6d28d9;
+      --link: #0969da;
+      --code-bg: #f6f8fa;
+      --th-bg: #f6f8fa;
+      --callout-note-bg: #ddf4ff;
+      --callout-note-border: #54aeff;
+      --callout-note-text: #0550ae;
+      --callout-tip-bg: #dafbe1;
+      --callout-tip-border: #2da44e;
+      --callout-tip-text: #116329;
+      --callout-warning-bg: #fff8c5;
+      --callout-warning-border: #d4a72c;
+      --callout-warning-text: #7d4e00;
+      --callout-caution-bg: #ffebe9;
+      --callout-caution-border: #ff8182;
+      --callout-caution-text: #82071e;
+      --callout-important-bg: #fbefff;
+      --callout-important-border: #c264f5;
+      --callout-important-text: #622cbc;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 230px;
+      min-width: 230px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding-bottom: 1rem;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem 1rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+
+    .project-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 1rem 1rem 0.4rem;
+    }
+
+    .nav-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.45rem 1rem;
+      font-size: 13.5px;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      margin: 1px 6px;
+      width: calc(100% - 12px);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--surface2);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .generated-at {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    #theme-toggle {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    #theme-toggle:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    #content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem 2.5rem;
+      max-width: 960px;
+    }
+
+    /* ── Doc sections ── */
+    .doc-section { display: none; }
+    .doc-section.active { display: block; }
+
+    /* ── Typography ── */
+    .doc-section h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .doc-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 2rem;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .doc-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 1.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .doc-section h4, .doc-section h5, .doc-section h6 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-top: 1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .doc-section p { margin-bottom: 0.9rem; }
+
+    .doc-section a { color: var(--link); text-decoration: none; }
+    .doc-section a:hover { text-decoration: underline; }
+
+    .doc-section ul, .doc-section ol {
+      padding-left: 1.5rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .doc-section li { margin-bottom: 0.25rem; }
+
+    .doc-section code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.85em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .doc-section pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+
+    .doc-section pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Tables ── */
+    .doc-section table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      display: block;
+    }
+
+    .doc-section th {
+      background: var(--th-bg);
+      text-align: left;
+      padding: 0.55rem 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .doc-section td {
+      padding: 0.55rem 0.85rem;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .doc-section tr:nth-child(even) td {
+      background: var(--surface);
+    }
+
+    /* ── Blockquotes ── */
+    .doc-section blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 0.5rem 1rem;
+      color: var(--muted);
+      margin-bottom: 0.9rem;
+      background: var(--surface);
+      border-radius: 0 6px 6px 0;
+      font-style: italic;
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: 8px;
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid;
+    }
+
+    .callout strong {
+      display: block;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .callout p { margin-bottom: 0; }
+
+    .callout-note    { background: var(--callout-note-bg);    border-color: var(--callout-note-border);    color: var(--callout-note-text); }
+    .callout-tip     { background: var(--callout-tip-bg);     border-color: var(--callout-tip-border);     color: var(--callout-tip-text); }
+    .callout-warning { background: var(--callout-warning-bg); border-color: var(--callout-warning-border); color: var(--callout-warning-text); }
+    .callout-caution { background: var(--callout-caution-bg); border-color: var(--callout-caution-border); color: var(--callout-caution-text); }
+    .callout-important { background: var(--callout-important-bg); border-color: var(--callout-important-border); color: var(--callout-important-text); }
+
+    /* ── Mermaid ── */
+    .mermaid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      overflow-x: auto;
+    }
+
+    /* ── Horizontal rule ── */
+    .doc-section hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  </style>
+</head>
+<body>
+  <nav id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">AutoSpec</div>
+      <div class="project-name">autospec</div>
+    </div>
+    <div class="nav-section-label">Documentation</div>
+    <button class="nav-item active" data-doc="architecture">ARCHITECTURE</button>
+      <button class="nav-item" data-doc="onboarding">ONBOARDING</button>
+      <button class="nav-item" data-doc="decisions">DECISIONS</button>
+      <button class="nav-item" data-doc="components">COMPONENTS</button>
+      <button class="nav-item" data-doc="api">API</button>
+      <button class="nav-item" data-doc="dependencies">DEPENDENCIES</button>
+  </nav>
+
+  <main>
+    <header>
+      <span class="header-title">autospec</span>
+      <span class="generated-at">Generated May 20, 2026</span>
+      <button id="theme-toggle">Light mode</button>
+    </header>
+
+    <div id="content">
+      <section id="doc-architecture" class="doc-section active">
+<h1>Architecture</h1>
+<h2>Overview</h2>
+<p>AutoSpec is a Node.js CLI tool that generates a living documentation suite for any codebase by scanning source files, filling markdown prompt templates with extracted context, and invoking <code>claude -p</code> to produce structured markdown output. It exists to eliminate the gap between code and documentation by automating generation at commit time, making docs self-maintaining rather than manually curated.</p>
+<h2>High-Level Diagram</h2>
+<div class="mermaid">graph TD
+    A[bin/autospec.js] --> B[src/cli.js]
+    B --> C{Command Router}
+    C -->|init / generate| D[src/config.js]
+    C -->|init / generate| E[src/scanner.js]
+    C -->|init| F[src/hooks.js]
+    D -->|config object| E
+    E -->|context object| G[src/generator.js]
+    G -->|filled prompt| H[claude -p]
+    H -->|markdown output| I[.autospec/*.md]
+    G --> J[src/reporter.js]
+    J --> K[.autospec/index.html]
+    F --> L[.git/hooks/post-commit]
+</div>
+<h2>Directory Structure</h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bin/autospec.js</code></td>
+<td>Thin entry point — parses <code>process.argv</code> and delegates to <code>src/cli.js</code></td>
+</tr>
+<tr>
+<td><code>src/cli.js</code></td>
+<td>Command router; owns all <code>process.exit()</code> calls and user-facing console output</td>
+</tr>
+<tr>
+<td><code>src/config.js</code></td>
+<td>Loads and deep-merges <code>.autospec.yaml</code> with defaults; detects project name and type</td>
+</tr>
+<tr>
+<td><code>src/scanner.js</code></td>
+<td>Walks the file tree, reads source files, extracts imports, identifies route files, estimates token usage</td>
+</tr>
+<tr>
+<td><code>src/generator.js</code></td>
+<td>Fills prompt templates with scanned context, calls <code>claude -p</code>, writes output files</td>
+</tr>
+<tr>
+<td><code>src/reporter.js</code></td>
+<td>Converts generated markdown docs to a single-page HTML report with dark/light theme and Mermaid support</td>
+</tr>
+<tr>
+<td><code>src/hooks.js</code></td>
+<td>Installs and removes <code>post-commit</code> / <code>pre-push</code> git hooks (Unix only)</td>
+</tr>
+<tr>
+<td><code>prompts/</code></td>
+<td>One <code>.md</code> prompt template per generated document — no generation logic inside JS</td>
+</tr>
+<tr>
+<td><code>scripts/demo-project/</code></td>
+<td>Self-contained Express API used to record demos and validate output quality</td>
+</tr>
+<tr>
+<td><code>.github/</code></td>
+<td>GitHub Actions workflow and composite action for CI-based doc generation</td>
+</tr>
+</tbody></table>
+<h2>Data Flow</h2>
+<ol>
+<li><strong>Entry</strong> — <code>bin/autospec.js</code> calls <code>cli.js:run()</code> with raw <code>process.argv</code> arguments.</li>
+<li><strong>Config</strong> — <code>config.js:loadConfig()</code> reads <code>.autospec.yaml</code> and deep-merges it with <code>DEFAULT_CONFIG</code>; <code>initConfig()</code> also auto-detects project name and type from <code>package.json</code>, <code>Cargo.toml</code>, or directory structure.</li>
+<li><strong>Scan</strong> — <code>scanner.js:scanProject()</code> walks the file tree (respecting <code>.gitignore</code> and config ignore lists via the <code>ignore</code> package), reads up to 30 prioritized source files, extracts ES/CJS/Python import statements, identifies route files by pattern-matching content, and estimates token usage.</li>
+<li><strong>Template fill</strong> — <code>generator.js:generateDocs()</code> iterates <code>DOC_CONFIGS</code>, reads each prompt template from <code>prompts/</code>, substitutes <code>{{PLACEHOLDER}}</code> variables with context data via <code>fillTemplate()</code>, and truncates at 100k characters if needed.</li>
+<li><strong>Claude invocation</strong> — the filled prompt is written to a temp file in <code>.autospec/</code> and passed to <code>claude -p</code> via stdin redirect (shell pipe on Windows, stdin redirect on Unix); output is captured with a 120-second timeout.</li>
+<li><strong>Write</strong> — each document is written to <code>.autospec/&lt;name&gt;.md</code>; <code>CLAUDE.md</code> is written to the project root via the <code>../</code> escape in <code>resolveOutputPath()</code>.</li>
+<li><strong>Report</strong> — <code>reporter.js:generateHTMLReport()</code> reads the generated markdown files, converts them to HTML (including Mermaid diagram unwrapping and GitHub-style callout preprocessing), and writes <code>.autospec/index.html</code>.</li>
+<li><strong>Hooks</strong> — on <code>init</code>, <code>hooks.js:setupHooks()</code> installs a <code>post-commit</code> shell script that re-runs <code>autospec generate --changed --quiet</code> in the background and stages updated docs.</li>
+</ol>
+<h2>Key Design Patterns</h2>
+<ul>
+<li><strong>Command map</strong> — <code>src/cli.js</code> uses a plain <code>COMMANDS</code> object keyed by command name; adding a new command requires only a new entry and a function in the same file.</li>
+<li><strong>Template-based prompts</strong> — all prompt logic lives in <code>prompts/*.md</code> files; <code>generator.js</code> only substitutes placeholders. Changing tone, structure, or output format requires no JS changes.</li>
+<li><strong>Structured result objects</strong> — <code>generateDocs()</code> returns <code>{ generated, failures }</code> so partial failures never abort the full run; callers decide how to surface errors.</li>
+<li><strong>Additive git hooks</strong> — <code>hooks.js:writeWithBackup()</code> appends to existing hooks rather than overwriting them, preserving any pre-existing hook scripts.</li>
+<li><strong>Path normalization</strong> — <code>normalizePath()</code> in <code>scanner.js</code> converts all backslashes to forward slashes before storing paths, preventing Windows path format from leaking into prompt templates.</li>
+<li><strong>Conditional doc generation</strong> — <code>DOC_CONFIGS</code> entries carry a <code>conditional</code> field (e.g., <code>hasRoutes</code>); <code>filterDocs()</code> skips docs whose condition the scanned context does not satisfy.</li>
+<li><strong>File prioritization</strong> — <code>prioritizeFiles()</code> in <code>scanner.js</code> sorts source files by a pattern list (entry points first, then routes, services, models) so the most architecturally significant files fill the context budget first.</li>
+</ul>
+<h2>Infrastructure &amp; Deployment</h2>
+<ul>
+<li><strong>Claude Code CLI</strong> (<code>claude -p</code>) — required runtime dependency; invoked as a subprocess per document; version-checked at startup via <code>checkClaudeCLI()</code>.</li>
+<li><strong>GitHub Actions</strong> — <code>.github/workflows/autospec.yml</code> and <code>.github/actions/autospec/action.yml</code> provide a composite action for CI-driven generation; supports <code>full</code> and <code>changed</code> modes with optional auto-commit.</li>
+<li><strong>Git hooks</strong> — <code>post-commit</code> hook runs <code>autospec generate --changed</code> in the background after every commit on Unix systems; <code>pre-push</code> hook optionally warns when docs may be stale.</li>
+<li><strong>npm global install</strong> — distributed as <code>autospec</code> binary via <code>bin.autospec</code> in <code>package.json</code>; no build step required.</li>
+</ul>
+<blockquote>
+<p>Inferred: The GitHub Action (<code>action.yml</code>) is present in the file tree but its content was not included in the source context — behavior above is inferred from README and workflow references.</p>
+</blockquote>
+<h2>Extension Points</h2>
+<ul>
+<li><strong>New generated document</strong> — add an entry to <code>DOC_CONFIGS</code> in <code>src/generator.js</code> (with <code>id</code>, <code>output</code>, <code>prompt</code>, and optionally <code>conditional</code>) and create the corresponding <code>prompts/&lt;name&gt;.md</code> template.</li>
+<li><strong>New CLI command</strong> — add a key/function pair to the <code>COMMANDS</code> map in <code>src/cli.js</code>; the function receives parsed flags and is responsible for its own spinner and output.</li>
+<li><strong>New scanned context</strong> — extend <code>scanProject()</code> in <code>src/scanner.js</code> to populate new fields on the <code>context</code> object, then add corresponding <code>{{PLACEHOLDER}}</code> entries in <code>fillTemplate()</code> in <code>src/generator.js</code>.</li>
+<li><strong>New config option</strong> — add a key with a sensible default to <code>DEFAULT_CONFIG</code> in <code>src/config.js</code>; deep merge ensures existing user configs remain valid.</li>
+<li><strong>New prompt placeholder</strong> — add the key/value pair to the <code>replacements</code> object in <code>fillTemplate()</code>; use it in any prompt template with <code>{{KEY}}</code> syntax.</li>
+<li><strong>Custom project type detection</strong> — extend the <code>detectProjectType()</code> heuristics in <code>src/config.js</code> by adding directory name checks to the <code>entrySet</code> conditionals.</li>
+</ul>
+
+</section>
+
+    <section id="doc-onboarding" class="doc-section">
+<h1>Onboarding</h1>
+<h2>Prerequisites</h2>
+<ul>
+<li><strong>Node.js</strong> — v18.0.0 or higher — <code>node --version</code></li>
+<li><strong>npm</strong> — bundled with Node.js — <code>npm --version</code></li>
+<li><strong>Claude Code CLI</strong> — any recent version — <code>claude --version</code><ul>
+<li>Install: <code>npm install -g @anthropic-ai/claude-code</code></li>
+<li>Authenticate: <code>claude login</code> (or set <code>ANTHROPIC_API_KEY</code> in your environment)</li>
+</ul>
+</li>
+</ul>
+<h2>Quick Start</h2>
+<ol>
+<li>Clone the repository: <code>git clone https://github.com/alfyanher/autospec.git</code></li>
+<li>Enter the project: <code>cd autospec</code></li>
+<li>Install dependencies: <code>npm install</code></li>
+<li>Run the CLI locally on a target project: <code>cd your-target-project &amp;&amp; node /path/to/autospec/bin/autospec.js init</code></li>
+<li>View generated docs in <code>.autospec/</code> of your target project</li>
+</ol>
+<p>To run AutoSpec on its own source (dog-fooding):</p>
+<ol start="6">
+<li>From the repo root: <code>node bin/autospec.js init</code></li>
+<li>Inspect <code>.autospec/</code> for generated documentation</li>
+</ol>
+<h2>Environment Variables</h2>
+<blockquote>
+<p>Not detected — check with the team.</p>
+</blockquote>
+<p>The only external credential AutoSpec needs is <code>ANTHROPIC_API_KEY</code>, consumed by the <code>claude</code> CLI subprocess — not read directly by AutoSpec itself.</p>
+<table>
+<thead>
+<tr>
+<th>VAR_NAME</th>
+<th>Required/Optional</th>
+<th>Description</th>
+<th>Example Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ANTHROPIC_API_KEY</code></td>
+<td>Required (if not logged in via <code>claude login</code>)</td>
+<td>Anthropic API key used by the Claude Code CLI subprocess</td>
+<td><code>sk-ant-api03-...</code></td>
+</tr>
+</tbody></table>
+<h2>Common Commands</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>node bin/autospec.js init</code></td>
+<td>First-time setup: scans project, generates all docs, installs git hook</td>
+</tr>
+<tr>
+<td><code>node bin/autospec.js generate</code></td>
+<td>Regenerate all documentation</td>
+</tr>
+<tr>
+<td><code>node bin/autospec.js generate --changed</code></td>
+<td>Fast incremental update — only docs affected by files changed since last commit</td>
+</tr>
+<tr>
+<td><code>node bin/autospec.js hook install</code></td>
+<td>Re-install the <code>post-commit</code> git hook</td>
+</tr>
+<tr>
+<td><code>node bin/autospec.js hook remove</code></td>
+<td>Remove the <code>post-commit</code> git hook</td>
+</tr>
+<tr>
+<td><code>node bin/autospec.js help</code></td>
+<td>Show all commands and flags</td>
+</tr>
+<tr>
+<td><code>npm test</code></td>
+<td>Run the test suite via Node.js built-in test runner</td>
+</tr>
+</tbody></table>
+<h2>Project Conventions</h2>
+<ul>
+<li><strong>ES Modules only</strong> — every file uses <code>import</code>/<code>export</code>; no <code>require()</code>. Example: <code>src/cli.js</code> opens with <code>import { scanProject } from &#39;./scanner.js&#39;</code></li>
+<li><strong>async/await everywhere</strong> — no raw Promise chains or callbacks. Example: <code>generator.js</code> uses <code>await</code> for every <code>claude -p</code> subprocess call</li>
+<li><strong>camelCase for variables and functions, UPPER_SNAKE for module-level constants</strong> — Example: <code>DOC_CONFIGS</code> array in <code>src/generator.js</code></li>
+<li><strong>No inline prompts</strong> — all Claude prompt templates live as <code>.md</code> files under <code>prompts/</code>, never embedded in JS</li>
+<li><strong>Path normalization</strong> — all file paths are run through <code>normalizePath()</code> before storing to keep Windows backslashes from breaking templates</li>
+<li><strong>No <code>process.exit()</code> inside <code>src/</code></strong> — only <code>src/cli.js</code> is allowed to exit the process; all other modules throw or return errors</li>
+<li><strong>Scanner and generator are decoupled</strong> — <code>src/scanner.js</code> returns a plain <code>context</code> object and knows nothing about prompts or output files</li>
+</ul>
+<h2>Where to Start Reading</h2>
+<ol>
+<li><code>bin/autospec.js</code> — Thin entry point; shows how the CLI is wired together before diving deeper</li>
+<li><code>src/cli.js</code> — Command routing hub (<code>init</code>, <code>generate</code>, <code>hook</code>, <code>help</code>); the best map of overall control flow</li>
+<li><code>src/scanner.js</code> — Walks the file tree and builds the <code>context</code> object that all prompts consume; understand this to know what data is available</li>
+<li><code>src/generator.js</code> — Fills prompt templates with context and invokes <code>claude -p</code>; defines <code>DOC_CONFIGS</code> which lists every generated document</li>
+<li><code>prompts/onboarding.md</code> — Representative example of a prompt template; illustrates the placeholder/format conventions used across all prompts</li>
+</ol>
+<h2>Common Pitfalls</h2>
+<ul>
+<li><strong><code>claude</code> CLI not on PATH</strong> — AutoSpec shells out to <code>claude -p</code>; if it isn&#39;t installed and authenticated the run fails immediately. Install with <code>npm install -g @anthropic-ai/claude-code</code> and run <code>claude login</code>.</li>
+<li><strong>Running <code>generate</code> before <code>init</code></strong> — AutoSpec requires <code>.autospec.yaml</code> at the project root. Always run <code>init</code> first; <code>generate</code> alone will error with &quot;No .autospec.yaml found&quot;.</li>
+<li><strong>Git hooks silently skipped on Windows</strong> — Hook installation uses <code>chmod</code>, which isn&#39;t available on Windows. Hooks will be skipped without error; use the GitHub Action (<code>.github/workflows/autospec.yml</code>) for automatic updates instead.</li>
+<li><strong>Large repos timing out</strong> — Very large codebases can exceed Claude&#39;s context window. Add noisy directories to the <code>ignore</code> list in <code>.autospec.yaml</code> to reduce token usage.</li>
+<li><strong>Editing prompt output by hand</strong> — The <code>.autospec/*.md</code> files are regenerated on every run and will overwrite manual edits. Customize output by editing the corresponding file in <code>prompts/</code> instead.</li>
+<li><strong>Confusing the demo project with AutoSpec itself</strong> — <code>scripts/demo-project/</code> is a standalone Express API used only for recording demos. It has its own <code>package.json</code>; running <code>npm install</code> there installs its dependencies, not AutoSpec&#39;s.</li>
+</ul>
+<h2>Getting Help</h2>
+<ul>
+<li><strong>README.md</strong> — Covers setup, all CLI flags, configuration options, GitHub Actions integration, and a full troubleshooting section</li>
+<li><strong><code>prompts/</code> directory</strong> — Plain-markdown prompt templates; editing them is the primary way to customize doc output without touching JS</li>
+<li><strong>GitHub Issues</strong> — <code>https://github.com/alfyanher/autospec.git</code> — bug reports and feature requests</li>
+<li><strong><code>CLAUDE.md</code></strong> (this repo) — Authoritative guide to code conventions, architecture, and contribution patterns for AI-assisted development</li>
+</ul>
+
+</section>
+
+    <section id="doc-decisions" class="doc-section">
+<h1>Architectural Decisions</h1>
+<blockquote>
+<p>All decisions are inferred from static analysis. Status is estimated, not authoritative.</p>
+</blockquote>
+<hr>
+<h3>ADR-001: Node.js as Runtime</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td>package.json — <code>&quot;engines&quot;: { &quot;node&quot;: &quot;&gt;=18.0.0&quot; }</code>, <code>&quot;type&quot;: &quot;module&quot;</code></td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> A CLI tool for generating documentation needed a runtime with strong file I/O, process spawning, and cross-platform npm distribution.</p>
+<p><strong>Decision:</strong> Node.js 18+ was chosen as the sole runtime, distributed via npm as a global CLI.</p>
+<p><strong>Alternatives not chosen:</strong> Deno, Bun, Python, Go</p>
+<p><strong>Trade-offs:</strong> npm ecosystem and broad developer familiarity at the cost of a heavier install footprint compared to a compiled binary; Node 18 enables native ES Modules and the built-in test runner without extra dependencies.</p>
+<hr>
+<h3>ADR-002: ES Modules Over CommonJS</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>db0b501 (initial implementation)</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td>package.json — <code>&quot;type&quot;: &quot;module&quot;</code>, all source files use <code>import</code>/<code>export</code></td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> Modern Node.js projects benefit from static analysis, top-level <code>await</code>, and alignment with browser module standards. The project had no legacy CJS constraints.</p>
+<p><strong>Decision:</strong> Pure ES Modules (<code>import</code>/<code>export</code>) with no CommonJS <code>require()</code> anywhere in source.</p>
+<p><strong>Alternatives not chosen:</strong> CommonJS, mixed CJS/ESM with dual packaging</p>
+<p><strong>Trade-offs:</strong> Dynamic <code>import()</code> is required in a few places to avoid circular dependencies (<code>src/config.js</code>, <code>src/scanner.js</code>, <code>src/cli.js</code>), but static imports everywhere else enable tree-shaking and clearer dependency graphs.</p>
+<hr>
+<h3>ADR-003: Express as Web Framework (Demo Project)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>scripts/demo-project/src/index.js:1</code> — <code>import express from &#39;express&#39;</code>, <code>scripts/demo-project/package.json</code></td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> The demo project needed a minimal REST API to demonstrate AutoSpec&#39;s documentation generation against a realistic Express codebase.</p>
+<p><strong>Decision:</strong> Express was chosen for the demo project&#39;s HTTP layer.</p>
+<p><strong>Alternatives not chosen:</strong> Fastify, Koa, Hono, NestJS</p>
+<p><strong>Trade-offs:</strong> Express has the largest ecosystem and highest developer recognition, making it ideal for a demo. It adds no meaningful weight to AutoSpec itself since it is scoped to <code>scripts/demo-project/</code>.</p>
+<hr>
+<h3>ADR-004: Zod for Request Validation (Demo Project)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>scripts/demo-project/src/routes/users.js:3</code> — <code>import { z } from &#39;zod&#39;</code>, <code>CreateUserSchema</code>, <code>CreatePostSchema</code></td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> The demo API routes needed input validation with clear, composable schema definitions and useful error output.</p>
+<p><strong>Decision:</strong> Zod schemas are used to parse and validate incoming request bodies at the route level.</p>
+<p><strong>Alternatives not chosen:</strong> Joi, Yup, AJV, express-validator</p>
+<p><strong>Trade-offs:</strong> Zod integrates cleanly with TypeScript inference and throws structured <code>ZodError</code> objects that the central error handler (<code>src/middleware/errors.js</code>) intercepts and maps to 400 responses — but it adds a runtime dependency to the demo project.</p>
+<hr>
+<h3>ADR-005: In-Memory Store for Demo Database</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>scripts/demo-project/src/db/client.js:1</code> — &quot;Stub in-memory database for the demo project&quot;, module-level <code>store</code> array</td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> The demo project exists only to produce a realistic file structure for AutoSpec to analyze — it is never deployed, so a real database would add unnecessary setup friction.</p>
+<p><strong>Decision:</strong> A plain in-memory object with stub CRUD methods (<code>db.users</code>, <code>db.posts</code>) is used in place of a real database.</p>
+<p><strong>Alternatives not chosen:</strong> SQLite, PostgreSQL via pg, Prisma, Drizzle</p>
+<p><strong>Trade-offs:</strong> Zero setup and no persistence. Data is lost on process restart, which is acceptable for a demo but would not suit any real use case.</p>
+<hr>
+<h3>ADR-006: claude CLI subprocess as Generation Engine</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>db0b501 (initial implementation)</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>src/generator.js</code> — <code>execSync(cmd, ...)</code> calling <code>claude -p</code>, <code>checkClaudeCLI()</code>, <code>CLAUDE_TIMEOUT_MS</code></td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> AutoSpec needs to call a large language model to generate documentation from source context. Building a direct API integration would require bundling an API client and managing authentication.</p>
+<p><strong>Decision:</strong> AutoSpec shells out to the <code>claude</code> CLI using <code>execSync</code>, passing a filled prompt template via stdin pipe.</p>
+<p><strong>Alternatives not chosen:</strong> Direct Anthropic API via SDK, OpenAI API, local LLM via Ollama</p>
+<p><strong>Trade-offs:</strong> Delegates authentication and model selection to the already-installed Claude Code CLI, but creates a hard runtime dependency on a separately-installed tool and limits parallelism to one doc at a time due to synchronous <code>execSync</code> calls.</p>
+<hr>
+<h3>ADR-007: Markdown Prompt Templates in <code>prompts/</code> Directory</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>db0b501 (initial implementation)</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>prompts/</code> directory with <code>architecture.md</code>, <code>decisions.md</code>, <code>onboarding.md</code>, etc.; <code>CLAUDE.md</code> — &quot;never inline prompts in JS code&quot;</td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> Prompt content evolves separately from generation logic. Inlining prompts in JavaScript makes them hard to read, edit, and contribute to.</p>
+<p><strong>Decision:</strong> Each generated document type has a corresponding <code>.md</code> file in <code>prompts/</code> loaded at runtime by <code>generator.js</code>.</p>
+<p><strong>Alternatives not chosen:</strong> Prompts embedded in JS strings, a separate prompt registry JSON file, a database of prompts</p>
+<p><strong>Trade-offs:</strong> Prompts are editable without touching JS code and can be contributed to independently, but require a file read per document generation and a defined <code>{{PLACEHOLDER}}</code> contract between templates and <code>fillTemplate()</code> in <code>generator.js</code>.</p>
+<hr>
+<h3>ADR-008: YAML for Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>db0b501 (initial implementation)</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>src/config.js</code> — <code>import YAML from &#39;yaml&#39;</code>, <code>.autospec.yaml</code> config file, <code>package.json</code> dependency <code>&quot;yaml&quot;: &quot;^2.3.0&quot;</code></td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> AutoSpec needs a user-editable configuration file. JSON lacks comments; TOML has weaker Node.js ecosystem support. YAML is the dominant format for developer tooling config (GitHub Actions, Docker Compose).</p>
+<p><strong>Decision:</strong> <code>.autospec.yaml</code> is the project configuration file, parsed with the <code>yaml</code> npm package.</p>
+<p><strong>Alternatives not chosen:</strong> JSON (<code>.autospec.json</code>), TOML, JavaScript config file (<code>.autospec.js</code>)</p>
+<p><strong>Trade-offs:</strong> YAML supports comments and is familiar to developers, but has edge-case parsing pitfalls (e.g., ambiguous booleans, indentation sensitivity). The <code>yaml</code> package adds a small dependency but is well-maintained.</p>
+<hr>
+<h3>ADR-009: Post-Commit Git Hook for Automatic Updates</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>db0b501 (initial implementation)</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>src/hooks.js</code> — <code>HOOK_CONTENT</code> post-commit script, <code>setupHooks()</code>, <code>autospec generate --changed --quiet &amp;</code></td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> Documentation becomes stale if it requires manual regeneration after every change. Automating regeneration at commit time ensures docs stay current without developer effort.</p>
+<p><strong>Decision:</strong> A <code>post-commit</code> git hook is installed that runs <code>autospec generate --changed --quiet</code> in the background with a 30-second timeout.</p>
+<p><strong>Alternatives not chosen:</strong> <code>pre-commit</code> hook, CI-only updates (GitHub Action), file watcher (chokidar), <code>pre-push</code> hook only</p>
+<p><strong>Trade-offs:</strong> Post-commit runs non-blocking in the background and stages updated docs automatically, but is limited to Unix (hooks require <code>chmod</code>). Windows users must use the GitHub Action. The hook appends rather than overwrites to preserve any existing hook scripts.</p>
+<hr>
+<h3>ADR-010: Error Middleware for Centralized HTTP Error Handling (Demo Project)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Status</td>
+<td>active</td>
+</tr>
+<tr>
+<td>Decided</td>
+<td>unknown</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>scripts/demo-project/src/middleware/errors.js</code> — <code>errorHandler</code> function, <code>scripts/demo-project/src/index.js</code> — <code>app.use(errorHandler)</code> registered last</td>
+</tr>
+</tbody></table>
+<p><strong>Context:</strong> Validation errors from Zod and unexpected server errors needed consistent JSON response formatting without duplicating error logic in every route handler.</p>
+<p><strong>Decision:</strong> A single Express error middleware (<code>errorHandler</code>) is registered last in the middleware stack to intercept <code>ZodError</code> and generic errors and format them as JSON responses.</p>
+<p><strong>Alternatives not chosen:</strong> Per-route try/catch with inline error responses, a dedicated error class hierarchy, <code>express-async-errors</code> patch</p>
+<p><strong>Trade-offs:</strong> Centralizes error formatting in one place and makes route handlers cleaner, but requires that all async route errors propagate via <code>next(err)</code> or thrown exceptions rather than being silently swallowed.</p>
+<hr>
+
+</section>
+
+    <section id="doc-components" class="doc-section">
+<h1>Components</h1>
+<h2>Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Location</th>
+<th>Responsibility</th>
+<th>Depends On</th>
+<th>Depended On By</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CLI Entry</td>
+<td><code>bin/</code></td>
+<td>Thin executable entry point</td>
+<td>CLI Core</td>
+<td>—</td>
+</tr>
+<tr>
+<td>CLI Core</td>
+<td><code>src/cli.js</code></td>
+<td>Command routing and orchestration</td>
+<td>Config, Scanner, Generator, Hooks</td>
+<td>CLI Entry</td>
+</tr>
+<tr>
+<td>Config</td>
+<td><code>src/config.js</code></td>
+<td>Load, merge, and initialize <code>.autospec.yaml</code></td>
+<td>—</td>
+<td>CLI Core</td>
+</tr>
+<tr>
+<td>Scanner</td>
+<td><code>src/scanner.js</code></td>
+<td>Walk file tree, read sources, extract imports</td>
+<td>—</td>
+<td>CLI Core, Generator</td>
+</tr>
+<tr>
+<td>Generator</td>
+<td><code>src/generator.js</code></td>
+<td>Fill prompt templates and invoke <code>claude</code> CLI</td>
+<td>Reporter</td>
+<td>CLI Core</td>
+</tr>
+<tr>
+<td>Reporter</td>
+<td><code>src/reporter.js</code></td>
+<td>Write output files and render HTML report</td>
+<td>—</td>
+<td>Generator</td>
+</tr>
+<tr>
+<td>Hooks</td>
+<td><code>src/hooks.js</code></td>
+<td>Install/remove git hooks</td>
+<td>—</td>
+<td>CLI Core</td>
+</tr>
+<tr>
+<td>Demo Project</td>
+<td><code>scripts/demo-project/</code></td>
+<td>Sample Express API for demos and recordings</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h2>Dependency Graph</h2>
+<div class="mermaid">graph TD
+  CLI_Entry --> CLI_Core
+  CLI_Core --> Config
+  CLI_Core --> Scanner
+  CLI_Core --> Generator
+  CLI_Core --> Hooks
+  Generator --> Reporter
+  Demo_Project_Index --> Demo_Routes_Users
+  Demo_Project_Index --> Demo_Routes_Posts
+  Demo_Project_Index --> Demo_Middleware_Errors
+  Demo_Routes_Users --> Demo_DB_Client
+  Demo_Routes_Posts --> Demo_DB_Client
+</div>
+<h2>Component Details</h2>
+<h3>CLI Entry</h3>
+<ul>
+<li><strong>Location:</strong> <code>bin/</code></li>
+<li><strong>Purpose:</strong> Thin executable shim that imports and delegates to the CLI Core.</li>
+<li><strong>Key files:</strong> <code>bin/autospec.js</code></li>
+<li><strong>Exports:</strong> Nothing — executable only.</li>
+<li><strong>Owns state:</strong> no</li>
+<li><strong>Coupling notes:</strong></li>
+</ul>
+<h3>CLI Core</h3>
+<ul>
+<li><strong>Location:</strong> <code>src/cli.js</code></li>
+<li><strong>Purpose:</strong> Routes <code>init</code>, <code>generate</code>, <code>hook</code>, and <code>help</code> commands and owns the top-level user-facing orchestration loop.</li>
+<li><strong>Key files:</strong> <code>src/cli.js</code></li>
+<li><strong>Exports:</strong> Default command dispatcher invoked by CLI Entry.</li>
+<li><strong>Owns state:</strong> no</li>
+<li><strong>Coupling notes:</strong> Directly imports all other <code>src/</code> modules; acts as the composition root.</li>
+</ul>
+<h3>Config</h3>
+<ul>
+<li><strong>Location:</strong> <code>src/config.js</code></li>
+<li><strong>Purpose:</strong> Loads and deep-merges <code>.autospec.yaml</code> against built-in defaults, and writes a template config on <code>init</code>.</li>
+<li><strong>Key files:</strong> <code>src/config.js</code></li>
+<li><strong>Exports:</strong> <code>loadConfig()</code>, <code>initConfig()</code>, <code>DEFAULT_CONFIG</code>.</li>
+<li><strong>Owns state:</strong> no</li>
+<li><strong>Coupling notes:</strong></li>
+</ul>
+<h3>Scanner</h3>
+<ul>
+<li><strong>Location:</strong> <code>src/scanner.js</code></li>
+<li><strong>Purpose:</strong> Walks the target project&#39;s file tree, reads source content, and extracts import relationships to produce a structured context object.</li>
+<li><strong>Key files:</strong> <code>src/scanner.js</code></li>
+<li><strong>Exports:</strong> <code>scanProject()</code> — returns a context object consumed by Generator.</li>
+<li><strong>Owns state:</strong> no</li>
+<li><strong>Coupling notes:</strong> Uses the <code>ignore</code> package to honour <code>.gitignore</code> rules; otherwise self-contained and knows nothing about prompts or output.</li>
+</ul>
+<h3>Generator</h3>
+<ul>
+<li><strong>Location:</strong> <code>src/generator.js</code></li>
+<li><strong>Purpose:</strong> Fills prompt templates with scanner context and invokes the <code>claude -p</code> CLI subprocess to produce documentation files.</li>
+<li><strong>Key files:</strong> <code>src/generator.js</code></li>
+<li><strong>Exports:</strong> <code>generateDocs()</code> — returns <code>{ generated, failures }</code>.</li>
+<li><strong>Owns state:</strong> no</li>
+<li><strong>Coupling notes:</strong> Directly spawns <code>claude</code> as a child process; tightly coupled to the Claude CLI interface and prompt file format.</li>
+</ul>
+<h3>Reporter</h3>
+<ul>
+<li><strong>Location:</strong> <code>src/reporter.js</code></li>
+<li><strong>Purpose:</strong> Writes generated markdown to <code>.autospec/</code> and renders an <code>index.html</code> summary report after each run.</li>
+<li><strong>Key files:</strong> <code>src/reporter.js</code></li>
+<li><strong>Exports:</strong> File-write and HTML-render utilities consumed by Generator.</li>
+<li><strong>Owns state:</strong> no</li>
+<li><strong>Coupling notes:</strong> Uses <code>marked</code> to convert markdown to HTML; only called by Generator.</li>
+</ul>
+<h3>Hooks</h3>
+<ul>
+<li><strong>Location:</strong> <code>src/hooks.js</code></li>
+<li><strong>Purpose:</strong> Installs or removes a <code>post-commit</code> git hook that triggers documentation regeneration.</li>
+<li><strong>Key files:</strong> <code>src/hooks.js</code></li>
+<li><strong>Exports:</strong> <code>installHook()</code>, <code>removeHook()</code>.</li>
+<li><strong>Owns state:</strong> no</li>
+<li><strong>Coupling notes:</strong> Uses <code>process.platform</code> guard before calling <code>chmod</code>; Unix-only functionality.</li>
+</ul>
+<h3>Demo Project</h3>
+<ul>
+<li><strong>Location:</strong> <code>scripts/demo-project/</code></li>
+<li><strong>Purpose:</strong> Standalone Express API used as a realistic target project for recording demos and testing AutoSpec end-to-end.</li>
+<li><strong>Key files:</strong> <code>scripts/demo-project/src/index.js</code>, <code>scripts/demo-project/src/routes/users.js</code>, <code>scripts/demo-project/src/routes/posts.js</code>, <code>scripts/demo-project/src/db/client.js</code>, <code>scripts/demo-project/src/middleware/errors.js</code></li>
+<li><strong>Exports:</strong> Nothing — not imported by any AutoSpec source module.</li>
+<li><strong>Owns state:</strong> yes — <code>scripts/demo-project/src/db/client.js</code> holds the database client instance.</li>
+<li><strong>Coupling notes:</strong> Fully isolated from AutoSpec source code; only related via the <code>scripts/record-demo.sh</code> runner.</li>
+</ul>
+<h2>Boundary Concerns</h2>
+<ul>
+<li><strong>Generator → claude subprocess:</strong> Generator is tightly coupled to the <code>claude -p</code> CLI contract (flags, exit codes, stdout format). Any change to the Claude CLI interface breaks generation silently unless the subprocess call is wrapped with explicit error checking.</li>
+<li><strong>Generator → Reporter:</strong> Reporter is not independently reachable — it can only be called through Generator. If report writing ever needs to be triggered from CLI Core directly (e.g., for a <code>--report-only</code> flag), this boundary will need renegotiation.</li>
+<li><strong>Demo Project isolation:</strong> The demo project has its own <code>package.json</code> and dependency tree but shares the repo root <code>.gitignore</code>. It is effectively an embedded sub-project with no formal workspace configuration, which could cause confusion if <code>npm install</code> is run from the root.</li>
+<li><strong><code>src/scanner.js</code> import map oddity:</strong> The import map shows <code>y, y, y, y</code> as imports alongside <code>ignore</code> — these appear to be parsing artefacts rather than real dependencies. No <code>y</code> package exists in <code>package.json</code>; the actual named imports from <code>yaml</code> or internal helpers may have been collapsed during context extraction.</li>
+</ul>
+
+</section>
+
+    <section id="doc-api" class="doc-section">
+<h1>API Reference</h1>
+<p><strong>Base URL:</strong> <code>http://localhost:3000</code>
+<strong>Authentication:</strong> varies — see per-endpoint notes</p>
+<hr>
+<h2>Health</h2>
+<h3><code>GET /health</code></h3>
+<blockquote>
+<p>Returns server liveness status.</p>
+</blockquote>
+<p><strong>Auth required:</strong> no</p>
+<p><strong>Path params:</strong> none</p>
+<p><strong>Query params:</strong> none</p>
+<p><strong>Request body:</strong> none</p>
+<p><strong>Responses:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+<th>Body shape</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>200</td>
+<td>Server is up</td>
+<td><code>{ status: &quot;ok&quot; }</code></td>
+</tr>
+</tbody></table>
+<p><strong>Example:</strong></p>
+<pre><code class="language-http">GET /health
+</code></pre>
+<pre><code class="language-json">{ &quot;status&quot;: &quot;ok&quot; }
+</code></pre>
+<hr>
+<h2>Users</h2>
+<blockquote>
+<p>All endpoints mounted at <code>/api/v1/users</code>. Route handler files were not included in the provided context.</p>
+</blockquote>
+<blockquote>
+<p>Schema not detected — inferred from handler usage.</p>
+</blockquote>
+<p><strong>Note:</strong> The <code>userRouter</code> is registered at <code>/api/v1/users</code>. Specific sub-routes, request bodies, and response shapes are not determinable from the provided source — only the entry point (<code>src/index.js</code>) was supplied. Auth requirements and individual endpoints require inspection of <code>src/routes/users.js</code>.</p>
+<hr>
+<h2>Posts</h2>
+<blockquote>
+<p>All endpoints mounted at <code>/api/v1/posts</code>. Route handler files were not included in the provided context.</p>
+</blockquote>
+<blockquote>
+<p>Schema not detected — inferred from handler usage.</p>
+</blockquote>
+<p><strong>Note:</strong> The <code>postRouter</code> is registered at <code>/api/v1/posts</code>. Specific sub-routes, request bodies, and response shapes are not determinable from the provided source — only the entry point (<code>src/index.js</code>) was supplied. Auth requirements and individual endpoints require inspection of <code>src/routes/posts.js</code>.</p>
+<hr>
+<h2>Error Handling</h2>
+<p>A global <code>errorHandler</code> middleware is registered after all routes. Error response shape is not determinable without inspecting <code>src/middleware/errors.js</code>.</p>
+
+</section>
+
+    <section id="doc-dependencies" class="doc-section">
+<h1>Dependencies</h1>
+<h2>Runtime Dependencies</h2>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Purpose</th>
+<th>Primary usage location</th>
+<th>Replaceable with</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>chalk</code></td>
+<td>^5.3.0</td>
+<td>Terminal string styling — colors and bold text for CLI output messages</td>
+<td><code>src/cli.js</code></td>
+<td><code>picocolors</code>, <code>kleur</code></td>
+</tr>
+<tr>
+<td><code>ora</code></td>
+<td>^7.0.0</td>
+<td>Animated terminal spinner displayed during generation steps</td>
+<td><code>src/cli.js</code></td>
+<td><code>nanospinner</code>, <code>cli-spinners</code></td>
+</tr>
+<tr>
+<td><code>yaml</code></td>
+<td>^2.3.0</td>
+<td>Parses and serializes <code>.autospec.yaml</code> config files</td>
+<td><code>src/config.js</code></td>
+<td><code>js-yaml</code></td>
+</tr>
+<tr>
+<td><code>ignore</code></td>
+<td>^5.3.0</td>
+<td>Applies <code>.gitignore</code>-style rules to filter files during project scanning</td>
+<td><code>src/scanner.js</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>marked</code></td>
+<td>^9.0.0</td>
+<td>Converts markdown output from Claude into HTML for the generated <code>index.html</code> report</td>
+<td><code>src/reporter.js</code></td>
+<td><code>markdown-it</code>, <code>micromark</code></td>
+</tr>
+</tbody></table>
+<h2>Development Dependencies</h2>
+<blockquote>
+<p>No <code>devDependencies</code> declared in <code>package.json</code>.</p>
+</blockquote>
+<h2>Potentially Unused</h2>
+<blockquote>
+<p>Packages present in manifest but not found in import usage scan.</p>
+</blockquote>
+<p>No packages appear to be unused — all five runtime dependencies have confirmed import matches.</p>
+<h2>Security &amp; Deprecation Notes</h2>
+<blockquote>
+<p>Based on knowledge cutoff. Run <code>npm audit</code> for current advisories.</p>
+</blockquote>
+<blockquote>
+<p>No known issues detected at time of generation.</p>
+</blockquote>
+<h2>License Notes</h2>
+<blockquote>
+<p>All detected dependencies use permissive licenses.</p>
+</blockquote>
+<ul>
+<li><code>chalk</code> — MIT</li>
+<li><code>ora</code> — MIT</li>
+<li><code>yaml</code> — ISC</li>
+<li><code>ignore</code> — MIT</li>
+<li><code>marked</code> — MIT</li>
+</ul>
+<h2>Overlap &amp; Redundancy</h2>
+<blockquote>
+<p>None detected.</p>
+</blockquote>
+
+</section>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const STORAGE_THEME = 'autospec-theme';
+      const STORAGE_DOC   = 'autospec-active-doc';
+
+      const html    = document.documentElement;
+      const toggle  = document.getElementById('theme-toggle');
+      const content = document.getElementById('content');
+
+      // ── Theme ──
+      const savedTheme = localStorage.getItem(STORAGE_THEME) || 'dark';
+      applyTheme(savedTheme);
+
+      toggle.addEventListener('click', () => {
+        const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem(STORAGE_THEME, next);
+        reinitMermaid();
+      });
+
+      function applyTheme(theme) {
+        html.dataset.theme = theme;
+        toggle.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+      }
+
+      // ── Navigation ──
+      const navItems  = Array.from(document.querySelectorAll('.nav-item'));
+      const sections  = Array.from(document.querySelectorAll('.doc-section'));
+
+      const savedDoc = localStorage.getItem(STORAGE_DOC);
+      const initialDoc = savedDoc && document.getElementById('doc-' + savedDoc)
+        ? savedDoc
+        : (navItems[0] ? navItems[0].dataset.doc : null);
+
+      if (initialDoc) showDoc(initialDoc);
+
+      navItems.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          showDoc(btn.dataset.doc);
+          localStorage.setItem(STORAGE_DOC, btn.dataset.doc);
+        });
+      });
+
+      function showDoc(id) {
+        sections.forEach((s) => s.classList.remove('active'));
+        navItems.forEach((b) => b.classList.remove('active'));
+        const section = document.getElementById('doc-' + id);
+        const btn     = navItems.find((b) => b.dataset.doc === id);
+        if (section) section.classList.add('active');
+        if (btn)     btn.classList.add('active');
+        content.scrollTop = 0;
+      }
+
+      // ── Mermaid ──
+      const currentTheme = () => html.dataset.theme === 'dark' ? 'dark' : 'default';
+
+      mermaid.initialize({ startOnLoad: false, theme: currentTheme() });
+
+      function reinitMermaid() {
+        const diagrams = document.querySelectorAll('.mermaid[data-processed]');
+        diagrams.forEach((el) => {
+          const src = el.getAttribute('data-src');
+          if (src) {
+            el.removeAttribute('data-processed');
+            el.innerHTML = src;
+          }
+        });
+        mermaid.initialize({ startOnLoad: false, theme: currentTheme() });
+        mermaid.run({ querySelector: '.mermaid' });
+      }
+
+      // Store original source before mermaid processes it
+      document.querySelectorAll('.mermaid').forEach((el) => {
+        el.setAttribute('data-src', el.textContent);
+      });
+
+      mermaid.run({ querySelector: '.mermaid' });
+    })();
+  </script>
+</body>
+</html>
